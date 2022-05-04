@@ -1,0 +1,272 @@
+<template>
+  <view class="content">
+    <view class="detail-banner_wrapper">
+      <swiper circular :current="currentBannerImg" class="detail-banner">
+        <swiper-item v-for="item in data.banner" :key="item">
+          <image :src="item" mode="aspectFit" class="detail-banner_image" />
+        </swiper-item>
+      </swiper>
+    </view>
+    <view class="detail-content">
+      <view class="detail-content_name">{{ data.name }}</view>
+      <view class="detail-content_price">{{ `￥${data.market_price / 100}` }}</view>
+      <view class="detail-content_choose" @click="handleShowChoose">
+        <text>请选择商品款式</text>
+      </view>
+    </view>
+    <view class="detail-detail">
+      <view class="detail-detail_title">商品详情</view>
+      <view class="detail-detail_body">
+        <image v-for="item in data.detail" :key="item" :src="item" class="detail-detail_image" mode="widthFix" />
+      </view>
+    </view>
+    <view class="detail-footer">
+      <view class="detail-footer_icon">首页</view>
+      <view class="detail-footer_icon">客服</view>
+      <view class="detail-footer_icon">购物车</view>
+      <button class="detail-btn detail-btn_add" @click="handleShowChoose">
+        加入购物车
+      </button>
+      <button class="detail-btn detail-btn_buy" @click="handleShowChoose">
+        立即购买
+      </button>
+    </view>
+    <view class="detail-choose_wrapper" v-if="showChoose">
+      <view class="detail-choose">
+        <view class="detail-choose_header">
+          <view class="detail-choose_image">
+            <image :src="skuImg" mode="aspectFit" class="detail-banner_image" />
+          </view>
+          <view class="detail-choose_content">
+            <view class="detail-choose_price">{{ `￥${data.market_price / 100}` }}</view>
+            <view class="detail-choose_stock">{{ `剩余${data.total_stock}件` }}</view>
+          </view>
+          <view class="detail-choose_close">
+            X
+          </view>
+        </view>
+        <view class="detail-choose_body">
+          <view class="detail-sku" v-for="sku in data.attributes" :key="sku.id">
+            <view class="detail-sku_key">
+              {{ sku.name }}
+            </view>
+            <view class="detail-sku_value-container">
+              <view class="detail-sku_value" v-for="item in sku.children" :key="item.id">
+                {{ item.name }}
+              </view>
+            </view>
+          </view>
+          <view class="detail-counter_wrapper">
+            <view class="detail-counter_text">购买数量</view>
+            <view class="detail-counter"></view>
+          </view>
+        </view>
+        <view class="detail-choose_footer">
+          <button class="detail-btn detail-btn_add" @click="">
+            加入购物车
+          </button>
+          <button class="detail-btn detail-btn_buy" @click="">
+            立即购买
+          </button>
+        </view>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script setup lang="ts">
+import { onLoad } from '@dcloudio/uni-app';
+import { reactive, ref, watchEffect } from 'vue'
+import { goodService } from '../../serve/api/good';
+import { IGoodDetail } from '../../serve/api/types/good.type';
+
+const currentBannerImg = ref(0)
+const data = reactive({} as IGoodDetail)
+
+const showChoose = ref(false)
+const skuImg = ref('')
+
+
+const load = (id: string) => {
+  goodService.getGoodDetailById(id).then(res => {
+    Object.assign(data, res)
+    skuImg.value = data.cover_url
+    console.log(res)
+  })
+}
+
+const handleShowChoose = () => {
+  showChoose.value = true
+}
+
+watchEffect(() => {
+  console.log(currentBannerImg.value)
+})
+
+onLoad((option) => {
+  console.log(option.id)
+  load(option.id!)
+})
+</script>
+
+<style scoped>
+.content {
+  display: flex;
+  flex-direction: column;
+  background-color: #eee;
+}
+
+.detail-banner_wrapper {
+  background-color: #fff;
+  width: 100%;
+}
+
+.detail-banner {
+  width: 100%;
+}
+
+.detail-banner_image {
+  height: 100%;
+  width: 100%;
+}
+
+.detail-content {
+  background-color: #fff;
+  padding: 30rpx;
+  padding-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.detail-content_name {
+  line-height: 20px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  text-overflow: ellipsis;
+}
+
+.detail-content_price {
+  font-size: 24px;
+  font-weight: bolder;
+  font-style: italic;
+}
+
+.detail-content_choose {
+  border-top: 1rpx solid #eee;
+  color: #e5e5e5;
+  padding: 20rpx 0;
+}
+
+.detail-detail {
+  background-color: #fff;
+  margin-top: 20rpx;
+}
+
+.detail-detail_title {
+  padding: 20rpx 30rpx;
+}
+
+.detail-detail_image {
+  width: 100%;
+}
+
+.detail-footer {
+  display: flex;
+  position: fixed;
+  justify-content: space-evenly;
+  align-items: center;
+  height: 100rpx;
+  width: 100%;
+  left: 0;
+  bottom: 0;
+  background-color: #fff;
+}
+
+.detail-btn {
+  height: 80rpx;
+  border: none;
+  width: 220rpx;
+  border-radius: 40rpx;
+  font-size: 14px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+}
+
+.detail-btn_add {
+  color: #ff6d6d;
+  background-color: #ffeeee;
+}
+
+.detail-btn_buy {
+  color: #fff;
+  background-color: #ff6d6d;
+}
+
+.detail-choose_wrapper {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.detail-choose {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #fff;
+  padding: 30rpx;
+  padding-bottom: 0;
+}
+
+.detail-choose_header {
+  display: flex;
+}
+
+.detail-choose_image {
+  width: 200rpx;
+  height: 200rpx;
+  border: 1rpx solid #e5e5e5;
+}
+
+.detail-choose_content {
+  align-self: flex-end;
+}
+
+.detail-choose_close {
+  margin-left: auto;
+  align-self: flex-start;
+}
+
+.detail-sku_value-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30rpx;
+}
+
+.detail-sku_value {
+  background-color: #eee;
+  border-radius: 10rpx;
+  padding: 10rpx 30rpx;
+}
+
+.detail-counter_wrapper {
+  display: flex;
+  justify-content: space-between;
+  border-top: 1rpx solid #e5e5e5;
+}
+
+.detail-choose_footer {
+  display: flex;
+  justify-content: center;
+  gap: 10rpx;
+}
+</style>

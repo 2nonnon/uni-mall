@@ -59,7 +59,7 @@ export interface IGoodsPage {
     goods: IGood[];
 }
 export interface IGoodDetail extends IGood {
-    attributes: IAttributes;
+    attributes: IAttributes[];
     skus: ISku[];
     banner: string[];
     detail: string[];

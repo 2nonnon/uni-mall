@@ -9,7 +9,9 @@
     </view>
     <view class="detail-content">
       <view class="detail-content_name">{{ data.name }}</view>
-      <view class="detail-content_price">{{ `￥${data.market_price / 100}` }}</view>
+      <view class="detail-content_price">
+        <price-vue :price="[data.market_price]"></price-vue>
+      </view>
       <view class="detail-content_choose" @click="handleShowChoose">
         <text>请选择商品款式</text>
       </view>
@@ -32,16 +34,19 @@
       </button>
     </view>
     <view class="detail-choose_wrapper" v-if="showChoose">
+      <view class="detail-choose_shade" @click="handleCloseChoose"></view>
       <view class="detail-choose">
         <view class="detail-choose_header">
           <view class="detail-choose_image">
             <image :src="skuImg" mode="aspectFit" class="detail-banner_image" />
           </view>
           <view class="detail-choose_content">
-            <view class="detail-choose_price">{{ `￥${data.market_price / 100}` }}</view>
-            <view class="detail-choose_stock">{{ `剩余${data.total_stock}件` }}</view>
+            <view class="detail-choose_price">
+              <price-vue :price="[price]"></price-vue>
+            </view>
+            <view class="detail-choose_stock">{{ `剩余${stock}件` }}</view>
           </view>
-          <view class="detail-choose_close">
+          <view class="detail-choose_close" @click="handleCloseChoose">
             X
           </view>
         </view>
@@ -51,21 +56,24 @@
               {{ sku.name }}
             </view>
             <view class="detail-sku_value-container">
-              <view class="detail-sku_value" v-for="item in sku.children" :key="item.id">
+              <view class="detail-sku_value" :class="{ 'detail-sku_choose': skuChoose.some(_ => _.id === item.id) }"
+                v-for="item in sku.children" :key="item.id" @click="handleChooseSku(item)">
                 {{ item.name }}
               </view>
             </view>
           </view>
           <view class="detail-counter_wrapper">
             <view class="detail-counter_text">购买数量</view>
-            <view class="detail-counter"></view>
+            <view class="detail-counter">
+              <counter-vue v-model="counter"></counter-vue>
+            </view>
           </view>
         </view>
         <view class="detail-choose_footer">
-          <button class="detail-btn detail-btn_add" @click="">
+          <button class="detail-btn detail-btn_add detail-detail_btn" @click="">
             加入购物车
           </button>
-          <button class="detail-btn detail-btn_buy" @click="">
+          <button class="detail-btn detail-btn_buy detail-detail_btn" @click="">
             立即购买
           </button>
         </view>
@@ -76,15 +84,22 @@
 
 <script setup lang="ts">
 import { onLoad } from '@dcloudio/uni-app';
-import { reactive, ref, watchEffect } from 'vue'
+import { reactive, ref, watch } from 'vue'
 import { goodService } from '../../serve/api/good';
 import { IGoodDetail } from '../../serve/api/types/good.type';
+import CounterVue from '../../components/Counter/Counter.vue';
+import PriceVue from '../../components/Price/Price.vue';
+import { IAttribute } from '../../serve/api/types/attribute.type';
 
 const currentBannerImg = ref(0)
 const data = reactive({} as IGoodDetail)
+const counter = ref(1)
 
 const showChoose = ref(false)
 const skuImg = ref('')
+const stock = ref(data.total_stock ?? 0)
+const price = ref(data.market_price ?? 0)
+const skuChoose = reactive<IAttribute[]>([])
 
 
 const load = (id: string) => {
@@ -98,9 +113,40 @@ const load = (id: string) => {
 const handleShowChoose = () => {
   showChoose.value = true
 }
+const handleCloseChoose = () => {
+  showChoose.value = false
+}
+const handleChooseSku = (attr: IAttribute) => {
+  console.log(attr)
+  const index = skuChoose.findIndex(item => item.parentId === attr.parentId)
+  console.log(index)
+  if (index >= 0) {
+    const [pre] = skuChoose.splice(index, 1)
+    if (pre.id === attr.id) {
+      return
+    }
+  }
+  console.log(skuChoose)
+  skuChoose.push(attr)
+}
 
-watchEffect(() => {
-  console.log(currentBannerImg.value)
+watch(skuChoose, () => {
+  if (skuChoose.length === data.attributes.length) {
+    const choosed = data.skus.find(item => {
+      return item.attributes.every(attr => {
+        if (attr.parentId === 0) return true
+        else {
+          return skuChoose.some(sku => sku.id === attr.id)
+        }
+      })
+    })
+
+    if (choosed) {
+      stock.value = choosed.stock
+      price.value = choosed.market_price
+      skuImg.value = choosed.img_url
+    }
+  }
 })
 
 onLoad((option) => {
@@ -213,6 +259,14 @@ onLoad((option) => {
   top: 0;
   width: 100%;
   height: 100vh;
+}
+
+.detail-choose_shade {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
 }
 
@@ -229,6 +283,7 @@ onLoad((option) => {
 
 .detail-choose_header {
   display: flex;
+  gap: 15rpx;
 }
 
 .detail-choose_image {
@@ -241,32 +296,70 @@ onLoad((option) => {
   align-self: flex-end;
 }
 
+.detail-choose_price {
+  font-weight: bolder;
+  font-style: italic;
+}
+
+.detail-choose_stock {
+  font-size: 14px;
+  color: #eee;
+}
+
 .detail-choose_close {
   margin-left: auto;
+  color: #eee;
   align-self: flex-start;
+}
+
+.detail-choose_body {
+  padding: 20rpx 0;
+  min-height: 15vh;
+  max-height: 50vh;
+  overflow: auto;
+}
+
+.detail-sku {
+  padding-top: 10rpx;
 }
 
 .detail-sku_value-container {
   display: flex;
   flex-wrap: wrap;
   gap: 30rpx;
+  padding: 20rpx 0;
 }
 
 .detail-sku_value {
   background-color: #eee;
   border-radius: 10rpx;
   padding: 10rpx 30rpx;
+  font-size: 14px;
+}
+
+.detail-sku_choose {
+  background-color: #ff6d6d;
+  color: #fff;
 }
 
 .detail-counter_wrapper {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   border-top: 1rpx solid #e5e5e5;
+  padding: 20rpx 0;
+  border-top: 1rpx solid #eee;
 }
 
 .detail-choose_footer {
   display: flex;
-  justify-content: center;
-  gap: 10rpx;
+  justify-content: space-evenly;
+  align-items: center;
+  height: 100rpx;
+  gap: 30rpx;
+}
+
+.detail-detail_btn {
+  flex: 1 1 0;
 }
 </style>

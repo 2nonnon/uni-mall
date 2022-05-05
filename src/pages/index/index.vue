@@ -23,7 +23,9 @@
           </view>
           <view class="card-content">
             <view class="card-content_name">{{ item.name }}</view>
-            <view class="card-content_price">{{ `￥${item.market_price / 100}` }}</view>
+            <view class="card-content_price">
+              <price-vue :price="[item.market_price]"></price-vue>
+            </view>
           </view>
         </view>
         <view class="card-placeholder" v-if="placeholder" />
@@ -36,6 +38,7 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import { goodService } from '../../serve/api/good';
 import { GetGoodsPageDto, IGood, Sort } from '../../serve/api/types/good.type';
+import PriceVue from '../../components/Price/Price.vue';
 
 const refresherTriggered = ref(false)
 const search = ref('')

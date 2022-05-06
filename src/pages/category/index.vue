@@ -2,16 +2,11 @@
   <view class="content">
     <view class="profile-header">
       <view class="profile-header_avatar">
-        <image src="../../static/avatar/profile.png" mode="scaleToFill" />
+        <image src="../../static/logo.png" mode="scaleToFill" />
       </view>
-      <view class="profile-header_content" v-if="hasSignIn">
+      <view class="profile-header_content">
         <view class="header-content_name">用户1551235288</view>
         <view class="header-content_id">id: 158835580</view>
-      </view>
-      <view class="profile-header_login" v-else>
-        <button open-type="" hover-class="button-hover" @click="handleSignIn">
-          登录
-        </button>
       </view>
     </view>
     <view class="profile-body">
@@ -37,58 +32,43 @@
 </template>
 
 <script setup lang="ts">
-import { onShow } from '@dcloudio/uni-app';
 import { ref } from 'vue'
 import { loginService } from '../../serve/api/login';
-const hasSignIn = ref(false)
+const title = ref('Hello lallala')
 
-const handleSignIn = () => {
-  loginService.signin().then(() => {
-    hasSignIn.value = true
+const login = () => {
+  loginService.signin().then((res) => {
+    console.log(res)
   })
 }
 
-onShow(() => {
-  console.log(loginService.accessToken)
-  hasSignIn.value = Boolean(loginService.accessToken)
-})
 </script>
 
 <style  scoped>
 .content {
-  width: 100%;
-  height: 100vh;
-}
-
-.profile-header {
-  display: flex;
-}
-
-.profile-header_avatar {
-  height: 100rpx;
-  width: 100rpx;
-}
-
-.profile-header_avatar image {
-  height: 100%;
-  width: 100%;
-}
-
-.profile-menu_list {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #ff6d6d;
 }
 
-.menu-list_item {
-  display: flex;
-  justify-content: flex-start;
-}
-.menu-list_item image {
-  width: 30rpx;
-  height: 30rpx;
-}
-
-.list-item_arrow {
+.logo {
+  height: 200rpx;
+  width: 200rpx;
+  margin-top: 200rpx;
   margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 50rpx;
+}
+
+.text-area {
+  display: flex;
+  justify-content: center;
+}
+
+.title {
+  font-size: 36rpx;
+  color: #8f8f94;
 }
 </style>

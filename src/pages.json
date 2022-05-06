@@ -24,6 +24,30 @@
 			"style": {
 				"navigationBarTitleText": "商品详情"
 			}
+		},
+		{
+			"path": "pages/address/index",
+			"style": {
+				"navigationBarTitleText": "address"
+			}
+		},
+		{
+			"path": "pages/order/index",
+			"style": {
+				"navigationBarTitleText": "order"
+			}
+		},
+		{
+			"path": "pages/confirm/index",
+			"style": {
+				"navigationBarTitleText": "confirm"
+			}
+		},
+		{
+			"path": "pages/category/index",
+			"style": {
+				"navigationBarTitleText": "category"
+			}
 		}
 	],
 	"globalStyle": {

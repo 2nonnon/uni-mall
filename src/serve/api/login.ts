@@ -9,6 +9,7 @@ class LoginService extends BaseHttpService {
         success: async (loginRes) => {
           console.log(loginRes.code);
           const res = await this.get<ISigninResponse>(`auth/wxsignin/${loginRes.code}`)
+          this.saveToken(res.accessToken)
           resovle(res)
         }
       })

@@ -70,7 +70,7 @@
           </view>
         </view>
         <view class="detail-choose_footer">
-          <button class="detail-btn detail-btn_add detail-detail_btn" @click="">
+          <button class="detail-btn detail-btn_add detail-detail_btn" @click="hadnleAddCart">
             加入购物车
           </button>
           <button class="detail-btn detail-btn_buy detail-detail_btn" @click="">
@@ -90,6 +90,7 @@ import { IGoodDetail } from '../../serve/api/types/good.type';
 import CounterVue from '../../components/Counter/Counter.vue';
 import PriceVue from '../../components/Price/Price.vue';
 import { IAttribute } from '../../serve/api/types/attribute.type';
+import { cartService } from '../../serve/api/cart';
 
 const currentBannerImg = ref(0)
 const data = reactive({} as IGoodDetail)
@@ -100,6 +101,7 @@ const skuImg = ref('')
 const stock = ref(data.total_stock ?? 0)
 const price = ref(data.market_price ?? 0)
 const skuChoose = reactive<IAttribute[]>([])
+const choosedId = ref(-1)
 
 
 const load = (id: string) => {
@@ -130,6 +132,12 @@ const handleChooseSku = (attr: IAttribute) => {
   skuChoose.push(attr)
 }
 
+const hadnleAddCart = () => {
+  cartService.createCart({skuId: choosedId.value, quantity: counter.value, goodId: data.id, goodName: data.name}).then(res => {
+    console.log(res)
+  })
+}
+
 watch(skuChoose, () => {
   if (skuChoose.length === data.attributes.length) {
     const choosed = data.skus.find(item => {
@@ -145,6 +153,7 @@ watch(skuChoose, () => {
       stock.value = choosed.stock
       price.value = choosed.market_price
       skuImg.value = choosed.img_url
+      choosedId.value = choosed.id 
     }
   }
 })

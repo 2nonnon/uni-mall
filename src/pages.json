@@ -48,6 +48,18 @@
 			"style": {
 				"navigationBarTitleText": "category"
 			}
+		},
+		{
+			"path": "pages/orderlist/index",
+			"style": {
+				"navigationBarTitleText": "orderlist"
+			}
+		},
+		{
+			"path": "pages/editAddress/index",
+			"style": {
+				"navigationBarTitleText": "editAddress"
+			}
 		}
 	],
 	"globalStyle": {

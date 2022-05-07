@@ -1,91 +1,40 @@
 <template>
   <view class="cart">
-    <view class="cart_head">
-      <view class="block"></view>
-      <view class="cart_goods">商品信息</view>
-      <view class="cart_price">单价</view>
-      <view class="cart_count">数量</view>
-      <view class="cart_total">金额</view>
-      <view class="cart_action">
-        <text class="end">操作</text>
-      </view>
-    </view>
-    <view class="cart_main">
-      <view class="main_head">
-        <checkbox-vue v-model:checked="checkAll" @click="handleCheckAll"></checkbox-vue>
-        <view class="main_title">
-          <view class="title_icon">
-            <svg t="1649937801927" class="title-icon x-icon" viewBox="0 0 1024 1024" version="1.1"
-              xmlns="http://www.w3.org/2000/svg" p-id="120032">
-              <path
-                d="M736.3584 847.4112H281.4464c-30.6176 0-55.3984-24.7808-55.3984-55.3984v-87.2448c0-30.6176 24.7808-55.3984 55.3984-55.3984h454.912c30.6176 0 55.3984 24.7808 55.3984 55.3984v87.2448c0 30.6176-24.832 55.3984-55.3984 55.3984z"
-                fill="#ff6d6d" p-id="120033" />
-              <path
-                d="M901.9904 321.3312c-10.4448 0-20.224-6.4-24.0128-16.7936l-16.7936-45.7216a25.6512 25.6512 0 0 1 15.2064-32.8704c13.312-4.864 28.0064 1.9456 32.8704 15.2064l16.7936 45.7216a25.6512 25.6512 0 0 1-24.064 34.4576z"
-                fill="#ff6d6d" p-id="120034" />
-              <path
-                d="M973.1072 415.232l-19.0464-51.8656a25.61536 25.61536 0 0 0-48.0768 17.664l19.0464 51.8656c8.0384 21.8112 7.7824 45.0048-0.6656 65.28a120.56576 120.56576 0 0 1-111.5648 74.3424c-66.6112 0-120.832-54.1696-120.832-120.832 0-14.1312-11.4688-25.6-25.6-25.6s-25.6 11.4688-25.6 25.6c0 66.6112-54.1696 120.832-120.832 120.832s-120.832-54.1696-120.832-120.832c0-14.1312-11.4688-25.6-25.6-25.6s-25.6 11.4688-25.6 25.6c0 66.6112-54.1696 120.832-120.832 120.832-48.8448 0-92.6208-29.1328-111.5136-74.1888-8.5504-20.3264-8.704-43.6736-0.5632-65.6384L212.1216 172.032a39.31136 39.31136 0 0 1 36.6592-25.4976H792.576c16.3328 0 31.1296 10.2912 36.7616 25.6512l7.168 19.456a25.63584 25.63584 0 0 0 32.8704 15.2064 25.61536 25.61536 0 0 0 15.2064-32.8704l-7.1168-19.456c-13.0048-35.4304-47.104-59.1872-84.7872-59.1872H248.832c-37.5296 0-71.5776 23.6544-84.6848 58.8288L67.1744 414.8224c-12.7488 34.2016-12.2368 70.8608 1.3312 103.2704a171.6736 171.6736 0 0 0 158.72 105.5744c61.7984 0 116.0704-32.768 146.432-81.8688 30.3104 49.0496 84.5824 81.8688 146.432 81.8688s116.0704-32.768 146.432-81.8688c30.3104 49.0496 84.5824 81.8688 146.432 81.8688 69.632 0 131.9936-41.5232 158.8224-105.7792 13.312-32.256 13.824-68.7104 1.3312-102.656z"
-                fill="#ff6d6d" p-id="120035" />
-              <path
-                d="M776.0384 380.8256H247.6032c-14.1312 0-25.6-11.4688-25.6-25.6s11.4688-25.6 25.6-25.6h528.4352c14.1312 0 25.6 11.4688 25.6 25.6s-11.4176 25.6-25.6 25.6zM802.048 933.7856H216.7296c-52.224 0-94.72-42.496-94.72-94.72v-183.808c0-14.1312 11.4688-25.6 25.6-25.6s25.6 11.4688 25.6 25.6v183.808c0 24.0128 19.5072 43.52 43.52 43.52h585.3184c24.0128 0 43.52-19.5072 43.52-43.52v-183.808c0-14.1312 11.4688-25.6 25.6-25.6s25.6 11.4688 25.6 25.6v183.808c0 52.224-42.496 94.72-94.72 94.72z"
-                fill="#ff6d6d" p-id="120036" />
-            </svg>
+    <view class="cart-main">
+      <view class="goods-list" v-if="data.length > 0">
+        <view class="good-card" v-for="item in data" :key="item.id">
+          <checkbox class="card-checkbox" :value="1" :checked="item.checked" @change="handleCheck" />
+          <view class="good-img">
+            <image :src="item.sku.img_url" mode="aspectFit" />
           </view>
-          <view class="text">原神万有铺子</view>
-        </view>
-      </view>
-      <view class="checkbox_group">
-        <view class="goods_list" v-if="data.length > 0">
-          <view class="good_card" v-for="item in data" :key="item.id">
-            <checkbox-vue v-model:checked="item.checked" @click="handleCheck"></checkbox-vue>
-            <view class="cart_goods">
-              <view class="good_img">
-                <img :src="item.sku.img_url" />
-              </view>
-              <view class="good_info">
-                <view class="good_name">{{ item.sku.name }}</view>
-                <!-- <view class="good_attr">甘雨-璃月港的一夜</view> -->
+          <view class="good-card_info">
+            <view class="good-info_header">
+              <view class="good-name">{{ item.goodName }}</view>
+              <view class="good-delete" @click="handleDelete(item.id)">
+                <icon type="cancel" size="20" />
               </view>
             </view>
-            <view class="cart_price">
-              <price-vue :num-font="16" :cur-font="16" :has-fix="true" :price="[item.sku.market_price]"></price-vue>
-            </view>
-            <view class="cart_count">
-              <counter-vue v-model="item.quantity"></counter-vue>
-            </view>
-            <view class="cart_total">
-              <price-vue :num-font="16" :cur-font="16" :has-fix="true" :price="[item.sku.market_price * item.quantity]">
-              </price-vue>
-            </view>
-            <view class="cart_action">
-              <view class="delete">
-                <view class="delete_icon" @click="handleDelete(item.id)">
-                  <svg t="1649938247656" class="delete-icon x-icon" viewBox="0 0 1024 1024" version="1.1"
-                    xmlns="http://www.w3.org/2000/svg" p-id="134323">
-                    <path
-                      d="M385.962667 234.538667h479.573333c16.810667 0 30.464 13.952 30.464 31.146666 0 17.322667-13.653333 31.274667-30.464 31.274667H158.421333A30.805333 30.805333 0 0 1 128 265.728c0-17.237333 13.610667-31.189333 30.421333-31.189333h136.277334a38.570667 38.570667 0 0 0 37.461333-31.445334l10.154667-52.053333C352.554667 111.530667 385.877333 85.333333 423.765333 85.333333h176.469334c37.888 0 71.168 26.197333 80.981333 63.744a31.317333 31.317333 0 0 1-21.504 38.272 30.378667 30.378667 0 0 1-37.290667-22.101333 23.125333 23.125333 0 0 0-22.186666-17.450667H423.765333a23.125333 23.125333 0 0 0-22.186666 17.450667l-9.685334 50.048c-1.365333 6.741333-3.413333 13.056-5.930666 19.2z m-38.016 640c-39.125333-0.853333-61.269333-22.613333-65.792-64.725334-13.098667-120.448-35.456-405.674667-35.669334-408.533333a31.146667 31.146667 0 0 0-32.810666-28.672 30.976 30.976 0 0 0-27.861334 33.621333c0.213333 2.901333 22.613333 289.109333 35.797334 410.538667 7.850667 72.661333 55.765333 118.698667 125.056 120.192h0.64a30.848 30.848 0 0 0 30.464-30.549333 30.933333 30.933333 0 0 0-29.866667-31.872zM810.325333 372.608a31.146667 31.146667 0 0 0-32.810666 28.629333c-0.213333 2.858667-22.784 288.853333-35.712 408.362667-4.608 43.008-27.050667 64.298667-68.608 65.109333l-16.554667 0.298667c-52.778667 0.938667-77.354667 1.408-136.32 1.194667h-0.085333a30.762667 30.762667 0 0 0-30.421334 31.061333 30.848 30.848 0 0 0 30.293334 31.36l31.189333 0.042667c43.52 0 60.842667-0.341333 93.44-0.981334l29.568-0.597333c72.149333-1.322667 120.064-46.421333 128.042667-120.661333 13.056-120.32 35.626667-407.296 35.84-410.154667a31.018667 31.018667 0 0 0-27.861334-33.664z"
-                      p-id="134324" />
-                  </svg>
-                </view>
+            <view class="good-attr">{{ item.sku.name }}</view>
+            <view class="good-info_footer">
+              <view class="good-price">
+                <price-vue :num-font="14" :cur-font="12" :has-fix="true" :price="[item.sku.market_price]"></price-vue>
+              </view>
+              <view class="good-count">
+                <counter-vue v-model="item.quantity"></counter-vue>
               </view>
             </view>
           </view>
         </view>
       </view>
     </view>
-    <view class="cart_foot">
-      <view class="submit_bar">
-        <checkbox-vue v-model:checked="checkAll" text="全选" @click="handleCheckAll"></checkbox-vue>
-        <view class="submit_container">
-          <view class="submit_info">
-            <view class="submit_count">
-              <text class="count_text">共</text>
-              <text class="count_num">{{ total }}</text>
-              <text class="count_text">件</text>
-            </view>
+    <view class="cart-footer">
+      <view class="submit-bar">
+        <checkbox class="card-checkbox" :value="1" :checked="checkAll" @change="handleCheckAll" />
+        <view class="submit-container">
+          <view class="submit-info">
             <view class="font-lg">合计（不含运费）：</view>
-            <view class="total_price">
-              <price-vue :price="[totalPrice]" :has-fix="true" :cur-font="24" :num-font="34"></price-vue>
+            <view class="good-price">
+              <price-vue :price="[totalPrice]" :has-fix="true" :cur-font="12" :num-font="14"></price-vue>
             </view>
           </view>
           <view>
@@ -100,7 +49,6 @@
 </template>
 
 <script setup lang="ts">
-import CheckboxVue from "../../components/Checkbox/Checkbox.vue";
 import CounterVue from "../../components/Counter/Counter.vue";
 import PriceVue from "../../components/Price/Price.vue";
 import { ref, reactive, onMounted, computed } from "vue";
@@ -209,318 +157,119 @@ onMounted(() => {
 .cart {
   display: flex;
   flex-direction: column;
-  margin: 0 auto;
-  width: 1260px;
-  padding-top: 24px;
-  padding-bottom: 24px;
+  min-height: 100vh;
+  width: 100%;
+  background-color: #eee;
 }
 
-/* .loading {
-    position: relative;
-    flex-grow: 1;
-} */
-.cart_head {
-  border-radius: 6px;
-  padding: 20px 30px;
-  text-align: center;
+.cart-main {
   background-color: #fff;
-  display: flex;
-  margin-bottom: 8px;
-  font-size: 16px;
-  line-height: 22px;
-  color: #9696a1;
 }
 
-.cart_head>view,
-.good_card>view {
+.good-card {
+  display: flex;
+}
+
+.card-checkbox {
+  transform: scale(.7);
+}
+
+
+.good-card {
   display: flex;
   align-items: center;
+  padding: 30rpx;
+  gap: 20rpx;
 }
 
-.block {
-  width: 40px;
+.good-img {
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: 10rpx;
+  border: 1px solid #f3f3f4;
 }
 
-.cart_goods {
-  flex: 1 1 0%;
-}
-
-.cart_price,
-.cart_count,
-.cart_total {
-  width: 150px;
-  justify-content: center;
-}
-
-view.cart_action {
-  width: 120px;
-  justify-content: flex-end;
-}
-
-.end {
-  margin-right: 24px;
-  width: 44px;
-  text-align: center;
-}
-
-.cart_main {
-  background-color: #fff;
-  padding-bottom: 16px;
-  border-radius: 6px;
-  overflow: hidden;
-}
-
-.main_head {
-  padding: 24px 30px 0 30px;
-  background-color: #fff;
-  display: flex;
-}
-
-.main_title {
-  display: flex;
-  align-items: center;
-  flex: 1;
-}
-
-.title_icon {
-  width: 24px;
-  height: 24px;
-  line-height: 24px;
-  text-align: center;
-}
-
-.title-icon {
-  font-size: 24px;
-}
-
-.x-icon {
-  width: 1em;
-  height: 1em;
-  vertical-align: -0.15em;
-  fill: currentColor;
-  overflow: hidden;
-}
-
-.text {
-  line-height: 22px;
-  font-size: 16px;
-  margin-left: 12px;
-}
-
-.checkbox_group {
-  margin-bottom: -8px;
-}
-
-.goods_list {
-  position: relative;
-}
-
-.good_card {
-  position: relative;
-  padding: 12px 30px;
-  display: flex;
-}
-
-.good_img {
-  position: relative;
-  width: 100px;
-  height: 100px;
-  background-color: #f3f3f4;
-  border-radius: 8px;
-  overflow: hidden;
-  border: 1px solid #c5c5cb;
-  margin-right: 24px;
-}
-
-.good_img img {
+.good-img image {
   height: 100%;
   width: 100%;
 }
 
-.good_info {
+.good-card_info {
+  flex: 1;
+  height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding-top: 8px;
-  height: 100%;
 }
 
-.good_name {
-  width: 350px;
-  line-height: 22px;
-  font-size: 16px;
-}
-
-.good_attr {
-  width: 350px;
-  font-size: 14px;
-  color: #9696a1;
-}
-
-.price {
-  font-size: 16px;
-}
-
-.currency {
-  padding-right: 2px;
-}
-
-.input_number {
-  display: inline-flex;
-  align-items: stretch;
-  border-radius: 8px;
-  overflow: hidden;
-  border: 1px solid #f3f3f4;
-  background-color: #fff;
-}
-
-.input_number input {
+.good-info_header,
+.good-info_footer {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 50px;
-  padding: 6px 7px;
-  font-size: 14px;
-  color: #16162e;
+  justify-content: space-between;
+}
+
+.good-name {
   line-height: 20px;
-  border-left: 1px solid #f3f3f4;
-  border-right: 1px solid #f3f3f4;
-  border-top: none;
-  border-bottom: none;
-  border-radius: none;
-  box-shadow: none;
-  outline: none;
-  appearance: none;
-  text-align: center;
+  font-size: 14px;
+  width: 400rpx;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.input_number button {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 32px;
-  height: 32px;
+.good-attr {
+  font-size: 14px;
+  line-height: 20px;
   color: #9696a1;
-  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
-  background-color: transparent;
-  vertical-align: initial;
-  outline: none;
-  border: none;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  text-overflow: ellipsis;
 }
 
-.input_number .disable {
-  color: #f3f3f4;
-  cursor: not-allowed;
+.good-price {
+  font-weight: bolder;
 }
 
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
+.cart-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
 }
 
-.cart_total .price {
-  color: #ff6d6d;
-}
-
-.delete {
-  width: 44px;
-  margin-right: 24px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-}
-
-.delete:hover .delete_icon {
-  color: #ff6d6d;
-}
-
-.delete_icon {
-  color: #c5c5cb;
-  width: 24px;
-  height: 24px;
-  font-size: 24px;
-  line-height: 24px;
-  text-align: center;
-}
-
-.good_card+.good_card::after {
-  content: "";
-  position: absolute;
-  left: 194px;
-  right: 53px;
-  top: 0;
-  border-top: 1px solid #e7e7ea;
-}
-
-.cart_foot {
-  position: sticky;
-  bottom: 0px;
-  z-index: 10;
-  margin-top: 8px;
-}
-
-.submit_bar {
+.submit-bar {
   background-color: #fff;
-  padding: 0 30px;
-  height: 100px;
-  border-radius: 6px;
-  border: 1px solid #f3f3f4;
+  padding: 30rpx;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.submit_bar .checkbox_item {
-  width: auto;
-  font-size: 16px;
-  line-height: 22px;
-}
-
-.submit_container,
-.submit_info {
+.submit-container,
+.submit-info {
   display: flex;
   align-items: center;
 }
 
-.submit_info {
-  margin-right: 30px;
+.submit-info {
   align-items: flex-end;
 }
 
-.submit_count {
-  font-size: 16px;
-  line-height: 22px;
-  margin-right: 30px;
-}
-
-.count_num {
-  margin: 0 1px;
-  color: #ff6d6d;
-}
-
 .font-lg {
-  font-size: 16px;
-  line-height: 22px;
-}
-
-.submit_price {
-  font-size: 34px;
-  line-height: 1;
-  font-weight: 500;
-  white-space: nowrap;
-  color: #ff6d6d;
+  font-size: 14px;
+  line-height: 20px;
 }
 
 button.settle {
-  width: 180px;
-  min-width: 180px;
-  height: 56px;
+  width: 180rpx;
+  min-width: 180rpx;
+  height: 56rpx;
   font-size: 18px;
   line-height: 24px;
   border-radius: 8px;
   border: 2px solid #ff6d6d;
-  padding: 0 28px;
+  padding: 0 28rpx;
   font-weight: 700;
   cursor: pointer;
   outline: none;

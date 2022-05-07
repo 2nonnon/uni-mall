@@ -1,13 +1,9 @@
 <template>
-  <div class="input_number">
-    <button :class="{ disable: modelValue <= range.min }" @click="handleDown">
-      -
-    </button>
+  <view class="input_number">
+    <view class="input_button" :class="{ disable: modelValue <= range.min }" @click="handleDown">-</view>
     <input step="1" type="number" autocomplete="off" v-model="quantity" @blur="handleBlur" />
-    <button :class="{ disable: modelValue >= range.max }" @click="handleUp">
-      +
-    </button>
-  </div>
+    <view class="input_button" :class="{ disable: modelValue >= range.max }" @click="handleUp">+</view>
+  </view>
 </template>
 
 <script setup lang="ts">
@@ -78,12 +74,13 @@ const handleBlur = () => {
   text-align: center;
 }
 
-.input_number > button {
+.input_button {
   display: flex;
   justify-content: center;
   align-items: center;
   width: 50rpx;
   height: 50rpx;
+  border-radius: 10rpx;
   color: #fff;
   background-color: #ff6d6d;
   font-weight: bold;
@@ -91,7 +88,8 @@ const handleBlur = () => {
   vertical-align: initial;
   outline: none;
   padding: 0;
-  line-height: 1;
+  font-size: 16px;
+  line-height: 30rpx;
 }
 
 .input_number .disable {

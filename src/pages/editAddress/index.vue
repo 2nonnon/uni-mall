@@ -1,52 +1,19 @@
 <template>
   <view class="address-wrapper">
-    <view class="address-header">
-      <view class="address-title">
-        {{ isEdit ? '编辑收货地址' : '新增收货地址' }}
-      </view>
-    </view>
     <view class="address-form">
       <view class="address-field">
         <view class="address-key">收货人</view>
         <view class="address-value">
           <view class="address-input">
-            <input
-              type="text"
-              placeholder="请填写收货人姓名"
-              class="input"
-              v-model="address.receiver"
-            />
+            <input type="text" placeholder="请填写收货人姓名" class="input" v-model="address.receiver" />
           </view>
         </view>
       </view>
       <view class="address-field">
         <view class="address-key">选择地区</view>
         <view class="address-value">
-          <view class="address-city-picker">
-            <view class="address-dropdown-menu">
-              <input
-                type="text"
-                placeholder="省份"
-                class="input"
-                v-model="location.province"
-              />
-            </view>
-            <view class="address-dropdown-menu">
-              <input
-                type="text"
-                placeholder="城市"
-                class="input"
-                v-model="location.city"
-              />
-            </view>
-            <view class="address-dropdown-menu">
-              <input
-                type="text"
-                placeholder="区县"
-                class="input"
-                v-model="location.town"
-              />
-            </view>
+          <view class="address-input">
+            <input type="text" placeholder="省份城市区县" class="input" v-model="location.province" />
           </view>
         </view>
       </view>
@@ -54,35 +21,22 @@
         <view class="address-key">详细地址</view>
         <view class="address-value">
           <view class="address-input">
-            <input
-              type="text"
-              placeholder="街道、楼牌号等"
-              class="input"
-              v-model="location.detail"
-            />
+            <input type="text" placeholder="街道、楼牌号等" class="input" v-model="location.detail" />
           </view>
         </view>
       </view>
-      <view class="address-field mb35">
+      <view class="address-field">
         <view class="address-key">手机号码</view>
         <view class="address-value">
           <view class="address-input">
-            <input
-              type="text"
-              placeholder="请填写收货人手机号"
-              class="input"
-              v-model="address.mobile"
-            />
+            <input type="text" placeholder="请填写收货人手机号" class="input" v-model="address.mobile" />
           </view>
         </view>
       </view>
       <view class="address-field">
         <view class="address-key">默认选择</view>
         <view class="address-value radio" @click="hanldeToggleDefault">
-          <view
-            class="address-radio"
-            :class="{ active: address.isDefault }"
-          ></view>
+          <view class="address-radio" :class="{ active: address.isDefault }"></view>
           <view class="address-radio-text">设为默认地址</view>
         </view>
       </view>
@@ -103,23 +57,20 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, watchEffect } from 'vue'
-import { addressService } from '../../../serve/api/address';
-import { CreateAddressDto, IAddress } from '../../../serve/api/types/address.type';
+import { onLoad } from '@dcloudio/uni-app';
+import { computed, onMounted, reactive, ref, watchEffect } from 'vue'
+import { addressService } from '../../serve/api/address';
+import { CreateAddressDto, IAddress } from '../../serve/api/types/address.type';
 
 enum EditStatus {
   CREATE = 'CREATE',
   UPDATE = 'UPDATE'
 }
 
-interface Props {
-  id?: string
-  status: EditStatus
-}
+const status = ref(EditStatus.CREATE)
 
-const props = defineProps<Props>()
 const isEdit = computed(() => {
-  return props.status === EditStatus.UPDATE
+  return status.value === EditStatus.UPDATE
 })
 
 const address = reactive<IAddress>({
@@ -181,7 +132,7 @@ const handleSaveAddress = () => {
     destination: address.destination,
     isDefault: address.isDefault
   }
-  policies[props.status](data)
+  policies[status.value](data)
 }
 const initLocation = () => {
   const tmp = address.destination.split(' ')
@@ -195,9 +146,11 @@ const initLocation = () => {
 watchEffect(() => {
   address.destination = Object.values(location).join(' ')
 })
-onMounted(() => {
-  if (props.id) {
-    addressService.getAddressById(props.id).then((res) => {
+
+onLoad((options) => {
+  status.value = options.status as EditStatus
+  if (options.id) {
+    addressService.getAddressById(options.id).then((res) => {
       Object.assign(address, res)
       initLocation()
     })
@@ -207,64 +160,50 @@ onMounted(() => {
 
 <style scoped>
 .address-wrapper {
-  position: relative;
   box-sizing: border-box;
-  width: 700px;
-  height: 519px;
+  width: 100%;
+  min-height: 100vh;
   background-color: #fff;
-  border-radius: 16px;
-}
-.address-header {
-  box-sizing: border-box;
   display: flex;
-  justify-content: center;
-  position: relative;
-  padding-top: 25px;
-  margin-bottom: 28px;
+  flex-direction: column;
 }
-.address-title {
-  font-size: 20px;
-  font-family: MicrosoftYaHei, sans-serif;
-  color: #1e1f20;
-  line-height: 28px;
-}
-.address-close-icon {
-  cursor: pointer;
-  width: 20px;
-  height: 20px;
-  position: absolute;
-  right: 28px;
-  top: 28px;
-}
+
 .address-form {
-  height: 343px;
-  padding: 0 40px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
+
 .address-field {
   display: flex;
   align-items: center;
-  margin-bottom: 20px;
+  gap: 20rpx;
+  padding: 30rpx;
   font-size: 14px;
   font-family: MicrosoftYaHei, sans-serif;
   color: #333;
   line-height: 14px;
 }
+
+.address-field:not(:last-child) {
+  border-bottom: 1px solid #eee;
+}
+
 .address-key {
   flex-shrink: 0;
-  width: 76px;
+  width: 120rpx;
 }
+
 .address-value {
   flex: 1;
 }
+
 .address-input {
   position: relative;
-  z-index: 20;
 }
+
 .input {
-  border: 1px solid #e6e6e6;
-  padding: 0 20px;
-  height: 48px;
-  border-radius: 4px;
+  height: 48rpx;
   box-sizing: border-box;
   width: 100%;
   background: #fff;
@@ -272,78 +211,69 @@ onMounted(() => {
   outline: none;
   font: inherit;
 }
+
 .input::placeholder {
   color: #ccc;
 }
-.input:focus {
-  border-color: #ff6d6d;
-}
-.address-city-picker {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  justify-content: space-between;
-}
-.address-dropdown-menu {
-  width: 168px;
-  height: 48px;
-  border-radius: 4px;
-  /* border: 1px solid #e6e6e6; */
-  position: relative;
-  z-index: 1000;
-  cursor: pointer;
-}
+
 .radio {
   display: flex;
   align-items: center;
 }
+
 .address-radio {
   width: 18px;
   height: 18px;
   border: 1px solid #ccc;
   border-radius: 50%;
   box-sizing: border-box;
-  margin-right: 10px;
+  margin-right: 10rpx;
 }
+
 .address-radio.active {
   background: #fff;
   border: 5px solid #ff6d6d;
 }
+
 .address-button-wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: 0 30rpx;
+  margin-bottom: 80rpx;
 }
+
 .address-button {
+  flex: 1;
   background-color: #ff6d6d;
-  border-radius: 6px;
+  border-radius: 40rpx;
   cursor: pointer;
   user-select: none;
-  width: 180px;
-  height: 48px;
+  height: 80rpx;
   display: flex;
   align-items: center;
   justify-content: center;
 }
+
 .address-button.disabled {
   background-color: #f1f1f1;
   cursor: not-allowed;
 }
+
 .address-button.line {
   border: 1px solid #ff6d6d;
   background-color: #fff;
   margin-right: 20px;
 }
+
 .address-button-text {
   font-size: 16px;
   font-family: MicrosoftYaHei, sans-serif;
   color: #fff;
   line-height: 20px;
 }
+
 .address-button.line .address-button-text {
   color: #ff6d6d;
-}
-.mb35 {
-  margin-bottom: 35px;
 }
 </style>

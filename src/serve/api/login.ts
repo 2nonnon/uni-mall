@@ -15,6 +15,10 @@ class LoginService extends BaseHttpService {
       })
     })
   }
+
+  signout () {
+    this.removeToken()
+  }
 }
 
 export const loginService = new LoginService()

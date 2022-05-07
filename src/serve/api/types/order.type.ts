@@ -7,7 +7,7 @@ export enum OrderStatus {
   HAS_CLOSED = 'HAS_CLOSED',
 }
 export interface IOrderDetail {
-  id: string;
+  id: number;
   goodId: number;
   cover_url: string;
   name: string;
@@ -19,7 +19,7 @@ export interface IOrderDetail {
   deal_time: string;
 }
 export interface IOrder {
-  id: string;
+  id: number;
   receive_info: string;
   paid: number;
   status: OrderStatus;

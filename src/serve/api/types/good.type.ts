@@ -12,7 +12,7 @@ export interface ISku {
     attributes: IAttribute[];
 }
 export interface IGood {
-    id: string;
+    id: number;
     code: string;
     hasSku: boolean;
     cover_url: string;
@@ -72,7 +72,7 @@ export interface GetGoodsPageDto {
     sort?: Sort;
 }
 export interface UpdateGoodSpuDto {
-  id: string;
+  id: number;
   code: string;
   cover_url: string;
   market_price: number;
@@ -87,7 +87,7 @@ export interface UpdateGoodSpuDto {
   categories: number[];
 }
 export interface UpdateGoodSkuDto {
-    id: string;
+    id: number;
     hasSku: boolean;
     total_stock: number;
     skus: CreateSkuDto[];

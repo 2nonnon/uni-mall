@@ -1,5 +1,5 @@
 import BaseHttpService from '../base-http.service'
-import { CreateCartDto, DeleteCartsByIdsDto, ICart } from './types/cart.type'
+import { CreateCartDto, DeleteCartsByIdsDto, ICart, UpdateCartDto } from './types/cart.type'
 
 class CartService extends BaseHttpService {
     private BASE_URL = 'carts'
@@ -24,8 +24,8 @@ class CartService extends BaseHttpService {
         return await this.post<ICart>(`${this.BASE_URL}/delete/ids`, form)
     }
 
-    async wxUpdateCart(id: number, form: CreateCartDto) {
-        return await this.post<ICart>(`${this.BASE_URL}/${id}`, form)
+    async wxUpdateCart(id: number, form: UpdateCartDto) {
+        return await this.post<ICart>(`${this.BASE_URL}/${id}/quantity`, form)
     }
 }
 

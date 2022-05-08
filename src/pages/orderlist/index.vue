@@ -12,21 +12,7 @@
     <view class="orderlist-body">
       <view class="orderlist-card" v-for="order in orderlist" :key="order.id">
         <view class="order-status">{{ order.status }}</view>
-        <view class="good-card" v-for="item in order.orderDetails" :key="item.id">
-          <image :src="item.cover_url" mode="scaleToFill" />
-          <view class="good-card_content">
-            <view class="good-content_up">
-              <view class="content-up_name">{{ item.name }}</view>
-              <view class="content-up_price">
-                <price-vue :has-fix="true" :num-font="14" :cur-font="13" :price="[item.market_price]"></price-vue>
-              </view>
-            </view>
-            <view class="good-content_down">
-              <view class="content-up_attr">{{ item.attr }}</view>
-              <view class="content-up_count">{{ `x${item.quantity}` }}</view>
-            </view>
-          </view>
-        </view>
+        <good-card :goods="order.orderDetails"></good-card>
         <view class="order-info">
           <view class="order-info_count">{{ `共${order.orderDetails.reduce((pre, cur) => pre + cur.quantity, 0)}件` }}
           </view>
@@ -45,6 +31,7 @@ import { orderService } from '../../serve/api/order';
 import { OrderStatus, IOrder } from '../../serve/api/types/order.type';
 import { reactive, ref } from 'vue';
 import PriceVue from '../../components/Price/Price.vue';
+import GoodCard from '../../components/GoodCard/index.vue'
 
 const orderStatusMap = {
   '待支付': OrderStatus.TO_PAID,
@@ -61,6 +48,7 @@ const loadOrders = () => {
   orderService.getOrdersPage({ page_size: 10, current_page: 1 }).then(res => {
     orderlist.length = 0
     orderlist.push(...res.orders)
+    console.log(orderlist, 1)
   })
 }
 
@@ -69,6 +57,7 @@ const handleFilteOrder = (nav: string, status: OrderStatus) => {
   orderService.getOrdersPage({ page_size: 10, current_page: 1, status }).then(res => {
     orderlist.length = 0
     orderlist.push(...res.orders)
+    console.log(orderlist, 2)
   })
 }
 loadOrders()
@@ -108,55 +97,6 @@ loadOrders()
 
 .order-status {
   color: #ff6d6d;
-}
-
-.good-card {
-  display: flex;
-  width: 100%;
-  gap: 20rpx;
-}
-
-.good-card image {
-  height: 150rpx;
-  width: 150rpx;
-  border: 1px solid #eee;
-  border-radius: 10rpx;
-}
-
-.good-card_content {
-  font-size: 14px;
-  flex: 1;
-}
-
-.good-content_up {
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-  margin-bottom: 10rpx;
-}
-
-.content-up_name {
-  width: 380rpx;
-  line-height: 20px;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-.good-content_down {
-  display: flex;
-  justify-content: space-between;
-  color: #ccc;
-}
-
-.content-up_attr {
-  width: 420rpx;
-  line-height: 20px;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  text-overflow: ellipsis;
 }
 
 .order-info {

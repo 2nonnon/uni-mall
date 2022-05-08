@@ -70,7 +70,7 @@
           </view>
         </view>
         <view class="detail-choose_footer">
-          <button class="detail-btn detail-btn_add detail-detail_btn" @click="hadnleAddCart">
+          <button class="detail-btn detail-btn_add detail-detail_btn" @click="handleAddCart">
             加入购物车
           </button>
           <button class="detail-btn detail-btn_buy detail-detail_btn" @click="">
@@ -90,7 +90,9 @@ import { IGoodDetail } from '../../serve/api/types/good.type';
 import CounterVue from '../../components/Counter/Counter.vue';
 import PriceVue from '../../components/Price/Price.vue';
 import { IAttribute } from '../../serve/api/types/attribute.type';
-import { cartService } from '../../serve/api/cart';
+import { useCart } from '../../composables/useCart'
+
+const { addCart } = useCart()
 
 const currentBannerImg = ref(0)
 const data = reactive({} as IGoodDetail)
@@ -132,10 +134,9 @@ const handleChooseSku = (attr: IAttribute) => {
   skuChoose.push(attr)
 }
 
-const hadnleAddCart = () => {
-  cartService.createCart({skuId: choosedId.value, quantity: counter.value, goodId: data.id, goodName: data.name}).then(res => {
-    console.log(res)
-  })
+const handleAddCart = () => {
+  addCart({skuId: choosedId.value, quantity: counter.value, goodId: data.id, goodName: data.name})
+  showChoose.value = false
 }
 
 watch(skuChoose, () => {

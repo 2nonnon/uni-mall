@@ -103,7 +103,7 @@ const handleSort = (item: Sort) => {
   load(generateConfig())
 }
 
-const handleToDetail = (id: string) => {
+const handleToDetail = (id: number) => {
   uni.navigateTo({
     url: `../detail/index?id=${id}`,
   })

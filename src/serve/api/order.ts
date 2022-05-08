@@ -2,9 +2,9 @@ import BaseHttpService from '../base-http.service'
 import { CreateOrderDto, GetOrdersPageDto, IOrder, IOrdersPage, UpdateOrderReceiveInfoDto, UpdateOrderStatusDto } from './types/order.type'
 
 class OrderService extends BaseHttpService {
-    private BASE_URL = 'orders/admin'
+    private BASE_URL = 'orders'
 
-    async getOrderById (id: string) {
+    async getOrderById (id: number) {
       return await this.get<IOrder>(`${this.BASE_URL}/${id}`)
     }
 
@@ -16,19 +16,19 @@ class OrderService extends BaseHttpService {
       return await this.post<IOrder>(`${this.BASE_URL}`, data)
     }
 
-    async deleteOrder (id: string) {
+    async deleteOrder (id: number) {
       return await this.delete<void>(`${this.BASE_URL}/${id}`)
     }
 
-    async updateOrderStatus (id: string, data: UpdateOrderStatusDto) {
+    async updateOrderStatus (id: number, data: UpdateOrderStatusDto) {
       return await this.post<IOrder>(`${this.BASE_URL}/${id}/status`, data)
     }
 
-    async updateOrderReceiveInfo (id: string, data: UpdateOrderReceiveInfoDto) {
+    async updateOrderReceiveInfo (id: number, data: UpdateOrderReceiveInfoDto) {
       return await this.post<IOrder>(`${this.BASE_URL}/${id}/receive`, data)
     }
 
-    async updateOrder (id: string, data: UpdateOrderStatusDto & UpdateOrderReceiveInfoDto) {
+    async updateOrder (id: number, data: UpdateOrderStatusDto & UpdateOrderReceiveInfoDto) {
       return await this.post<IOrder>(`${this.BASE_URL}/${id}/update`, data)
     }
 }

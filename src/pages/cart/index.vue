@@ -1,16 +1,16 @@
 <template>
   <view class="cart">
     <view class="cart-main">
-      <view class="goods-list" v-if="data.length > 0">
-        <view class="good-card" v-for="item in data" :key="item.id">
-          <checkbox class="card-checkbox" :value="1" :checked="item.checked" @change="handleCheck" />
+      <view class="goods-list" v-if="cartlist.length > 0">
+        <view class="good-card" v-for="item in cartlist" :key="item.id">
+          <checkbox class="card-checkbox" :checked="item.checked" @click="checkCart(item)" />
           <view class="good-img">
             <image :src="item.sku.img_url" mode="aspectFit" />
           </view>
           <view class="good-card_info">
             <view class="good-info_header">
               <view class="good-name">{{ item.goodName }}</view>
-              <view class="good-delete" @click="handleDelete(item.id)">
+              <view class="good-delete" @click="deleteCart(item.id)">
                 <icon type="cancel" size="20" />
               </view>
             </view>
@@ -29,18 +29,21 @@
     </view>
     <view class="cart-footer">
       <view class="submit-bar">
-        <checkbox class="card-checkbox" :value="1" :checked="checkAll" @change="handleCheckAll" />
+        <view class="submit-checkall">
+          <checkbox class="card-checkbox" :checked="checkAll" @click="checkAllCart" />
+          <text>全选</text>
+        </view>
         <view class="submit-container">
           <view class="submit-info">
-            <view class="font-lg">合计（不含运费）：</view>
+            <view class="submit-info_text">不含运费 合计</view>
             <view class="good-price">
-              <price-vue :price="[totalPrice]" :has-fix="true" :cur-font="12" :num-font="14"></price-vue>
+              <price-vue :price="[totalPrice]" :has-fix="true" :cur-font="13" :num-font="16"></price-vue>
             </view>
           </view>
           <view>
-            <button :disabled="btnDisabled" class="settle" @click="handleSettle">
+            <view :class="{ 'good-settle_disable': hasChecked }" class="good-settle" @click="handleSettle">
               结算
-            </button>
+            </view>
           </view>
         </view>
       </view>
@@ -49,65 +52,35 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted } from "vue";
 import CounterVue from "../../components/Counter/Counter.vue";
 import PriceVue from "../../components/Price/Price.vue";
-import { ref, reactive, onMounted, computed } from "vue";
-import { ICart } from "../../serve/api/types/cart.type";
-import { cartService } from "../../serve/api/cart";
+import { useCart } from "../../composables/useCart"
 import { orderService } from "../../serve/api/order";
 
-interface CheckableCart extends ICart {
-  checked: boolean;
-}
-
-const data = reactive<CheckableCart[]>([]);
-
-const checkAll = ref(false);
-const btnDisabled = ref(true);
-
-const total = computed<number>(() => {
-  return data.reduce((pre, cur) => {
-    if (cur.checked) return pre + cur.quantity;
-    else return pre;
-  }, 0);
-});
-const totalPrice = computed<number>(() => {
-  return data.reduce((pre, cur) => {
-    if (cur.checked) return pre + cur.quantity * cur.sku.market_price;
-    else return pre;
-  }, 0);
-});
-
-const btnCheck = () => {
-  const has = data.some((item) => item.checked);
-  if (has) btnDisabled.value = false;
-  else btnDisabled.value = true;
-};
-
-const handleCheck = () => {
-  const isAll = data.every((item) => item.checked);
-  if (isAll) checkAll.value = true;
-  else checkAll.value = false;
-  btnCheck();
-};
-
-const handleCheckAll = () => {
-  data.forEach((item) => (item.checked = checkAll.value));
-  btnCheck();
-};
+const {
+  cartlist,
+  checkAll,
+  hasChecked,
+  totalPrice,
+  checkCart,
+  checkAllCart,
+  loadCartlist,
+  deleteCart,
+  deleteCarts } = useCart()
 
 const handleSettle = () => {
   const ids: number[] = [];
-  const settleGoods = data.filter((item) => item.checked);
+  const settleGoods = cartlist.filter((item) => item.checked);
   const paid = settleGoods.reduce((res, cur) => {
     ids.push(cur.id);
     return res + cur.quantity * cur.sku.market_price;
   }, 0);
-  const orderDetaile = settleGoods.map((item) => {
+  const orderDetails = settleGoods.map((item) => {
     return {
-      goodId: item.sku.id,
+      goodId: item.id,
       cover_url: item.sku.img_url,
-      name: item.sku.name,
+      name: item.goodName,
       attr: item.sku.name,
       quantity: item.quantity,
       market_price: item.sku.market_price,
@@ -117,39 +90,20 @@ const handleSettle = () => {
   orderService
     .createOrder({
       paid: paid,
-      orderDetails: orderDetaile,
+      orderDetails: orderDetails,
     })
     .then((res) => {
       console.log("create order", res);
       console.log(ids);
-      cartService.deleteCartByIds({ ids });
+      deleteCarts(ids)
+      uni.navigateTo({
+        url: `../confirm/index?id=${res.id}`,
+      })
     });
 };
 
-const handleDelete = (id: number) => {
-  cartService.deleteCart(id).then((res) => {
-    console.log("删除", res);
-    load();
-  });
-};
-
-const load = () => {
-  cartService.getCarts().then((res) => {
-    console.log("cart----", res);
-    data.length = 0;
-    data.push(
-      ...res.map((item) => {
-        const tmp = item as CheckableCart;
-        tmp.checked = false;
-        return tmp;
-      })
-    );
-    console.log("data----", data);
-  });
-};
-
 onMounted(() => {
-  load();
+  loadCartlist();
 });
 </script>
 
@@ -179,14 +133,14 @@ onMounted(() => {
   display: flex;
   align-items: center;
   padding: 30rpx;
-  gap: 20rpx;
 }
 
 .good-img {
-  width: 140rpx;
-  height: 140rpx;
+  width: 180rpx;
+  height: 180rpx;
   border-radius: 10rpx;
   border: 1px solid #f3f3f4;
+  margin-right: 20rpx;
 }
 
 .good-img image {
@@ -196,7 +150,6 @@ onMounted(() => {
 
 .good-card_info {
   flex: 1;
-  height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -206,12 +159,13 @@ onMounted(() => {
 .good-info_footer {
   display: flex;
   justify-content: space-between;
+  align-items: center;
 }
 
 .good-name {
   line-height: 20px;
   font-size: 14px;
-  width: 400rpx;
+  width: 300rpx;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -220,6 +174,8 @@ onMounted(() => {
 .good-attr {
   font-size: 14px;
   line-height: 20px;
+  width: 300rpx;
+  height: 40px;
   color: #9696a1;
   overflow: hidden;
   display: -webkit-box;
@@ -236,6 +192,7 @@ onMounted(() => {
   position: fixed;
   bottom: 0;
   left: 0;
+  width: 100%;
 }
 
 .submit-bar {
@@ -246,70 +203,51 @@ onMounted(() => {
   align-items: center;
 }
 
+.submit-checkall {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+
 .submit-container,
 .submit-info {
   display: flex;
   align-items: center;
 }
 
+.submit-container {
+  gap: 20rpx;
+}
+
 .submit-info {
   align-items: flex-end;
 }
 
-.font-lg {
+.submit-info_text {
   font-size: 14px;
   line-height: 20px;
+  margin-right: 10rpx;
 }
 
-button.settle {
+.good-settle {
   width: 180rpx;
   min-width: 180rpx;
   height: 56rpx;
-  font-size: 18px;
-  line-height: 24px;
-  border-radius: 8px;
-  border: 2px solid #ff6d6d;
-  padding: 0 28rpx;
-  font-weight: 700;
-  cursor: pointer;
-  outline: none;
+  font-size: 14px;
+  line-height: 20px;
+  border-radius: 28rpx;
+  color: #fff;
+  background-color: #ff6d6d;
+  font-weight: bold;
   display: inline-flex;
   justify-content: center;
   align-items: center;
   transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
 }
 
-.settle {
-  color: #fff;
-  background-color: #ff6d6d;
-  position: relative;
-}
-
-.settle::after {
-  content: "";
-  position: absolute;
-  background-color: rgba(255, 255, 255, 0.5);
-  border: 2px solid rgba(255, 255, 255, 0);
-  border-radius: 8px;
-  opacity: 0;
-  width: 100%;
-  height: 100%;
-  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.settle:not(:disabled):hover::after {
-  opacity: 1;
-}
-
-.settle:disabled {
+.good-settle_disable {
   color: #c5c5cb;
   background-color: #f3f3f4;
-  border-color: #f3f3f4;
-  cursor: not-allowed;
-}
-
-.total_price {
-  font-weight: 500;
-  color: #ff6d6d;
 }
 </style>

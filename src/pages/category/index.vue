@@ -1,30 +1,20 @@
 <template>
-  <view class="content">
-    <view class="profile-header">
-      <view class="profile-header_avatar">
-        <image src="../../static/logo.png" mode="scaleToFill" />
-      </view>
-      <view class="profile-header_content">
-        <view class="header-content_name">用户1551235288</view>
-        <view class="header-content_id">id: 158835580</view>
+  <view class="category-container">
+    <view class="category-parent">
+      <view class="category-parent_wrapper" @click="handleChooseCategory(null)">
+        <view class="category-parent_name">全部商品</view>
+        <view class="category-arrow">〉</view>
       </view>
     </view>
-    <view class="profile-body">
-      <view class="profile-menu_list">
-        <view class="menu-list_item">
-          <image src="" mode="scaleToFill" />
-          <view class="list-item_content">我的订单</view>
-          <view class="list-item_arrow">〉</view>
-        </view>
-        <view class="menu-list_item">
-          <image src="" mode="scaleToFill" />
-          <view class="list-item_content">收货地址</view>
-          <view class="list-item_arrow">〉</view>
-        </view>
-        <view class="menu-list_item">
-          <image src="" mode="scaleToFill" />
-          <view class="list-item_content">联系客服</view>
-          <view class="list-item_arrow">〉</view>
+    <view class="category-parent" v-for="parent in categories" :key="parent.name">
+      <view class="category-parent_wrapper" @click="handleChooseCategory(parent)">
+        <view class="category-parent_name">{{ parent.name }}</view>
+        <view class="category-arrow">〉</view>
+      </view>
+      <view class="category-children_container" v-if="parent.children && parent.children!.length > 0">
+        <view class="category-child" v-for="child in parent.children" :key="child.name"
+          @click="handleChooseCategory(child)">{{ child.name
+          }}
         </view>
       </view>
     </view>
@@ -32,43 +22,60 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { loginService } from '../../serve/api/login';
-const title = ref('Hello lallala')
+import { onLoad } from '@dcloudio/uni-app';
+import { useCategory } from '../../composables/useCategory';
 
-const login = () => {
-  loginService.signin().then((res) => {
-    console.log(res)
+const {
+  categories,
+  getCategories,
+  chooseCategory } = useCategory()
+
+const handleChooseCategory = (item: (typeof chooseCategory extends ((T: infer K) => void) ? K : void)) => {
+  chooseCategory(item)
+  uni.switchTab({
+    url: '../index/index'
   })
 }
 
+onLoad(() => {
+  getCategories()
+})
 </script>
 
 <style  scoped>
-.content {
+.category-container {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #eee;
+  padding-bottom: 10vh;
+}
+
+.category-parent {
+  padding: 30rpx;
+  border-bottom: 1px solid #eee;
+  background-color: #fff;
+}
+
+.category-parent_wrapper {
+  width: 100%;
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  background-color: #ff6d6d;
+  font-size: 16px;
+  font-weight: bold;
 }
 
-.logo {
-  height: 200rpx;
-  width: 200rpx;
-  margin-top: 200rpx;
-  margin-left: auto;
-  margin-right: auto;
-  margin-bottom: 50rpx;
+.category-children_container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20rpx;
+  margin-top: 30rpx;
 }
 
-.text-area {
-  display: flex;
-  justify-content: center;
-}
-
-.title {
-  font-size: 36rpx;
-  color: #8f8f94;
+.category-child {
+  background-color: #eee;
+  padding: 20rpx 30rpx;
+  border-radius: 20rpx;
+  font-size: 14px;
 }
 </style>

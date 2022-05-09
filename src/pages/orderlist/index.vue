@@ -1,5 +1,5 @@
 <template>
-  <view class="content">
+  <view class="orderlsit-container">
     <view class="orderlist-nav">
       <view class="orderlist-nav_item" :class="{ 'nav-item_active': '全部' === activeNav }" @click="loadOrders">
         全部
@@ -9,29 +9,33 @@
         {{ item }}
       </view>
     </view>
-    <view class="orderlist-body">
-      <view class="orderlist-card" v-for="order in orderlist" :key="order.id">
-        <view class="order-status">{{ order.status }}</view>
-        <good-card :goods="order.orderDetails"></good-card>
+    <view class="orderlist-body" v-if="hasOrder">
+      <view class="orderlist-card" v-for="order in orderlist" :key="order.id" @click="handleToOrderDetail(order.id)">
+        <view class="order-status">{{ orderStatusReMap[order.status] }}</view>
+        <good-card style="width: 100%;" :goods="order.orderDetails"></good-card>
         <view class="order-info">
           <view class="order-info_count">{{ `共${order.orderDetails.reduce((pre, cur) => pre + cur.quantity, 0)}件` }}
           </view>
           <text>需付款</text>
           <view class="order-info_price">
-            <price-vue :has-fix="true" :num-font="16" :cur-font="14" :price="[order.paid]"></price-vue>
+            <price-vue :has-fix="true" :num-font="16" :cur-font="13" :price="[order.paid]"></price-vue>
           </view>
         </view>
       </view>
     </view>
+    <empty-placeholder class="orderlist-empty"
+      url="../../static/status/a6945b3ad80b13e7f43f8cea003d63f9_7131855251702464767.png" text="暂无订单" v-else>
+    </empty-placeholder>
   </view>
 </template>
 
 <script setup lang="ts">
 import { orderService } from '../../serve/api/order';
 import { OrderStatus, IOrder } from '../../serve/api/types/order.type';
-import { reactive, ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import PriceVue from '../../components/Price/Price.vue';
 import GoodCard from '../../components/GoodCard/index.vue'
+import EmptyPlaceholder from "../../components/EmptyPlaceholder/index.vue"
 
 const orderStatusMap = {
   '待支付': OrderStatus.TO_PAID,
@@ -40,8 +44,19 @@ const orderStatusMap = {
   '售后': OrderStatus.TO_SERVICE
 }
 
+const orderStatusReMap = {
+  [OrderStatus.TO_PAID]: '待支付',
+  [OrderStatus.TO_SEND]: '待发货',
+  [OrderStatus.TO_DEAL]: '待收货',
+  [OrderStatus.TO_SERVICE]: '售后',
+  [OrderStatus.HAS_CLOSED]: '交易关闭'
+}
+
 const activeNav = ref('全部')
 const orderlist = reactive<IOrder[]>([])
+const hasOrder = computed(() => {
+  return orderlist.length > 0
+})
 
 const loadOrders = () => {
   activeNav.value = '全部'
@@ -60,14 +75,23 @@ const handleFilteOrder = (nav: string, status: OrderStatus) => {
     console.log(orderlist, 2)
   })
 }
+
+const handleToOrderDetail = (id: number) => {
+  uni.navigateTo({
+    url: `../order/index?id=${id}`,
+  })
+}
+
 loadOrders()
 </script>
 
 <style scoped>
-.content {
+.orderlsit-container {
   min-height: 100vh;
   width: 100%;
   background-color: #eee;
+  display: flex;
+  flex-direction: column;
 }
 
 .orderlist-nav {
@@ -113,5 +137,10 @@ loadOrders()
   margin-left: 10rpx;
   font-weight: bolder;
   font-style: italic;
+}
+
+.orderlist-empty {
+  background-color: #fff;
+  flex: 1;
 }
 </style>

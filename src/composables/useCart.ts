@@ -14,6 +14,9 @@ const checkAll = ref(false)
 const hasChecked = computed<boolean>(() => {
     return !cartlist.some(item => item.checked)
 });
+const hasCart = computed<boolean>(() => {
+    return cartlist.length > 0
+});
 
 const totalPrice = computed<number>(() => {
     return cartlist.reduce((pre, cur) => {
@@ -70,6 +73,7 @@ const loadCartlist = () => {
 
 export const useCart = () => {
     return {
+        hasCart,
         cartlist,
         checkAll,
         hasChecked,

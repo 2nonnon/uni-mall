@@ -1,15 +1,21 @@
 <template>
   <view class="order-confirm">
     <view class="order-address">
-      <view class="order-address_header">
-        <view class="address-info">{{ address.destination }}</view>
-        <view class="order-address_more">〉</view>
+      <view class="order-address_has" v-if="hasAddress">
+        <view class="order-address_header">
+          <view class="address-info">{{ address.destination }}</view>
+          <view class="order-address_more">〉</view>
+        </view>
+        <view class="order-address_footer">
+          <view>{{ address.receiver }}</view>
+          <view>{{
+              `${address.mobile?.slice(0, 3)}****${address.mobile?.slice(7)}`
+          }}</view>
+        </view>
       </view>
-      <view class="order-address_footer">
-        <view>{{ address.receiver }}</view>
-        <view>{{
-            `${address.mobile?.slice(0, 3)}****${address.mobile?.slice(7)}`
-        }}</view>
+      <view class="order-address_empty" v-else>
+        <view class="address-empty_tip">无收货地址，请点击前往设置</view>
+        <view class="order-address_more">〉</view>
       </view>
     </view>
     <view class="order-body">
@@ -18,7 +24,7 @@
         <view class="other-info_row">
           <view class="row_label">运费：</view>
           <view class="row_value">
-            <price-vue :price="[0]" :has-fix="true" :cur-font="14" :num-font="14"></price-vue>
+            <price-vue :price="[0]" :has-fix="true" :cur-font="13" :num-font="14"></price-vue>
           </view>
         </view>
         <view class="other-info_row">
@@ -32,18 +38,21 @@
     <view class="order-remark">
       <text class="order-remark_title">备注</text>
       <view class="order-remark_input">
-        <input placeholder="选填，建议先和客服协商一致" placeholder-class="input-placeholder" @input="" />
+        <input placeholder="选填，建议先和客服协商一致" placeholder-class="input-placeholder" selection-start="0" selection-end="0"
+          @input="" />
       </view>
     </view>
     <view class="confirm-footer">
-      <view class="confirm-footer_info">
-        <view class="confirm-footer_text">共3件, 需付款</view>
-        <view class="confirm-footer_price">
-          <price-vue :price="[data.paid]" :has-fix="true" :cur-font="18" :num-font="18"></price-vue>
+      <view class="confirm-footer_wrapper">
+        <view class="confirm-footer_info">
+          <view class="confirm-footer_text">共3件, 需付款</view>
+          <view class="confirm-footer_price">
+            <price-vue :price="[data.paid]" :has-fix="true" :cur-font="14" :num-font="18"></price-vue>
+          </view>
         </view>
-      </view>
-      <view :class="{ 'good-settle_disable': hasAddress }" class="good-settle" @click="handleSettle">
-        结算
+        <view :class="{ 'good-settle_disable': hasAddress }" class="good-settle" @click="handleSettle">
+          提交订单
+        </view>
       </view>
     </view>
   </view>
@@ -79,11 +88,6 @@ const getDefaultAddress = () => {
   })
 }
 
-const handleChooseAddress = (data: IAddress) => {
-  console.log('choose address', data)
-  Object.assign(address, data)
-}
-
 const handleSettle = () => {
   orderService.updateOrder(data.id, {
     receive_info: data.receive_info,
@@ -117,7 +121,7 @@ onLoad((option) => {
   background-color: #eee;
   display: flex;
   flex-direction: column;
-  gap: 30rpx;
+  gap: 20rpx;
   min-height: 100vh;
 }
 
@@ -129,16 +133,48 @@ onLoad((option) => {
 .order-address_header,
 .order-address_footer {
   display: flex;
+  gap: 10rpx;
+}
+
+.order-address_header {
+  justify-content: space-between;
+  margin-bottom: 10rpx;
+  font-size: 16px;
+}
+
+.order-address_more {
+  color: #9696a1;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.order-address_footer {
+  color: #9696a1;
+  font-size: 14px;
+}
+
+.order-address_empty {
+  display: flex;
+  justify-content: space-between;
+}
+
+.address-empty_tip {
+  font-size: 18px;
 }
 
 .order-body {
   padding: 30rpx;
   background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
 }
 
 .other-info {
   display: flex;
   flex-direction: column;
+  gap: 20rpx;
+  font-size: 14px;
 }
 
 .other-info_row {
@@ -150,12 +186,6 @@ onLoad((option) => {
 .row_label {
   font-size: 14px;
   line-height: 20px;
-  color: #9696a1;
-}
-
-.row_value {
-  font-weight: 700;
-  text-align: right;
 }
 
 .value_text {
@@ -167,31 +197,54 @@ onLoad((option) => {
   display: flex;
   background-color: #fff;
   padding: 30rpx;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  gap: 30rpx;
+}
+
+.order-remark_input {
+  flex: 1;
+}
+
+.order-remark_input input {
+  direction: rtl;
+  color: #9696a1;
 }
 
 .confirm-footer {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
   position: fixed;
   bottom: 0;
   left: 0;
   width: 100%;
   background-color: #fff;
+}
+
+.confirm-footer_wrapper {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
   padding: 30rpx;
+  gap: 20rpx;
 }
 
 .confirm-footer_info {
   display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+
+.confirm-footer_price {
+  font-weight: bolder;
 }
 
 .good-settle {
-  width: 180rpx;
-  min-width: 180rpx;
-  height: 56rpx;
+  width: 220rpx;
+  min-width: 220rpx;
+  height: 80rpx;
   font-size: 14px;
   line-height: 20px;
-  border-radius: 28rpx;
+  border-radius: 40rpx;
   color: #fff;
   background-color: #ff6d6d;
   font-weight: bold;

@@ -7,10 +7,10 @@
       <view class="profile-header_content" v-if="hasSignIn">
         <view class="header-content_name">用户1551235288</view>
       </view>
-      <view class="profile-header_signin" v-else>
-        <button open-type="" hover-class="button-hover" @click="handleSignIn">
-          登录
-        </button>
+      <view class="profile-header_content" v-else>
+        <view class="profile-header_signin" @click="handleSignIn">
+          点击登录
+        </view>
       </view>
     </view>
     <view class="profile-body">
@@ -32,11 +32,11 @@
         </view>
       </view>
     </view>
-    <view class="profile-footer">
-      <view class="profile-footer_signout" v-if="hasSignIn">
-        <button open-type="" hover-class="button-hover" @click="handleSignOut">
+    <view class="profile-footer" v-if="hasSignIn">
+      <view class="profile-footer_wrapper">
+        <view class="profile-footer_signout" @click="handleSignOut">
           退出登录
-        </button>
+        </view>
       </view>
     </view>
   </view>
@@ -62,8 +62,7 @@ const handleToAddress = () => {
 
 <style  scoped>
 .content {
-  display: flex;
-  flex-direction: column;
+  position: relative;
   width: 100%;
   height: 100vh;
   background-color: #eee;
@@ -94,9 +93,8 @@ const handleToAddress = () => {
 }
 
 .profile-body {
-  margin-top: 30rpx;
+  margin-top: 20rpx;
   background-color: #fff;
-  flex: 1;
 }
 
 .profile-menu_list {
@@ -124,8 +122,29 @@ const handleToAddress = () => {
 }
 
 .profile-footer {
-  padding: 30rpx;
+  width: 100%;
+  position: absolute;
+  bottom: 40rpx;
+}
+
+.profile-footer_wrapper {
   display: flex;
   justify-content: center;
+}
+
+.profile-footer_signout {
+  width: 80%;
+  height: 80rpx;
+  font-size: 14px;
+  line-height: 20px;
+  border-radius: 40rpx;
+  color: #fff;
+  background-color: #ff6d6d;
+  font-weight: bold;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
 }
 </style>

@@ -1,19 +1,21 @@
 <template>
+  <view class="good-card_container">
     <view class="good-card" v-for="item in goods" :key="item.id">
-        <image :src="item.cover_url" mode="aspectFit" />
-        <view class="good-card_content">
-            <view class="good-content_up">
-                <view class="content-up_name">{{ item.name }}</view>
-                <view class="content-up_price">
-                    <price-vue :has-fix="true" :num-font="14" :cur-font="13" :price="[item.market_price]"></price-vue>
-                </view>
-            </view>
-            <view class="good-content_down">
-                <view class="content-up_attr">{{ item.attr }}</view>
-                <view class="content-up_count">{{ `x${item.quantity}` }}</view>
-            </view>
+      <image :src="item.cover_url" mode="aspectFit" />
+      <view class="good-card_content">
+        <view class="good-content_up">
+          <view class="content-up_name">{{ item.name }}</view>
+          <view class="content-up_price">
+            <price-vue :has-fix="true" :num-font="14" :cur-font="13" :price="[item.market_price]"></price-vue>
+          </view>
         </view>
+        <view class="good-content_down">
+          <view class="content-up_attr">{{ item.attr }}</view>
+          <view class="content-up_count">{{ `x${item.quantity}` }}</view>
+        </view>
+      </view>
     </view>
+  </view>
 </template>
 
 <script setup lang="ts">
@@ -24,6 +26,13 @@ defineProps<{ goods: IOrderDetail[] }>()
 </script>
 
 <style scoped>
+.good-card_container {
+  display: flex;
+  width: 100%;
+  gap: 20rpx;
+  flex-direction: column;
+}
+
 .good-card {
   display: flex;
   width: 100%;

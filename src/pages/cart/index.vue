@@ -1,7 +1,7 @@
 <template>
   <view class="cart">
     <view class="cart-main">
-      <view class="goods-list" v-if="cartlist.length > 0">
+      <view class="goods-list" v-if="hasCart">
         <view class="good-card" v-for="item in cartlist" :key="item.id">
           <checkbox class="card-checkbox" :checked="item.checked" @click="checkCart(item)" />
           <view class="good-img">
@@ -27,7 +27,7 @@
         </view>
       </view>
     </view>
-    <view class="cart-footer">
+    <view class="cart-footer" v-if="hasCart">
       <view class="submit-bar">
         <view class="submit-checkall">
           <checkbox class="card-checkbox" :checked="checkAll" @click="checkAllCart" />
@@ -48,6 +48,9 @@
         </view>
       </view>
     </view>
+    <empty-placeholder class="cart-empty"
+      url="../../static/status/432e3e45a99c0e0d5b462045e478fdc8_6064925561101343264.webp" text="您的购物车空空如也~" v-else>
+    </empty-placeholder>
   </view>
 </template>
 
@@ -57,8 +60,10 @@ import CounterVue from "../../components/Counter/Counter.vue";
 import PriceVue from "../../components/Price/Price.vue";
 import { useCart } from "../../composables/useCart"
 import { orderService } from "../../serve/api/order";
+import EmptyPlaceholder from "../../components/EmptyPlaceholder/index.vue"
 
 const {
+  hasCart,
   cartlist,
   checkAll,
   hasChecked,
@@ -128,6 +133,10 @@ onMounted(() => {
   transform: scale(.7);
 }
 
+.cart-empty {
+  width: 100%;
+  height: 100vh;
+}
 
 .good-card {
   display: flex;

@@ -23,9 +23,9 @@
       </view>
     </view>
     <view class="detail-footer">
-      <view class="detail-footer_icon">首页</view>
+      <view class="detail-footer_icon" @click="handleToHomePage">首页</view>
       <view class="detail-footer_icon">客服</view>
-      <view class="detail-footer_icon">购物车</view>
+      <view class="detail-footer_icon" @click="handleToCart">购物车</view>
       <button class="detail-btn detail-btn_add" @click="handleShowChoose">
         加入购物车
       </button>
@@ -105,7 +105,6 @@ const price = ref(data.market_price ?? 0)
 const skuChoose = reactive<IAttribute[]>([])
 const choosedId = ref(-1)
 
-
 const load = (id: string) => {
   goodService.getGoodDetailById(id).then(res => {
     Object.assign(data, res)
@@ -132,6 +131,17 @@ const handleChooseSku = (attr: IAttribute) => {
   }
   console.log(skuChoose)
   skuChoose.push(attr)
+}
+
+const handleToHomePage = () => {
+    uni.switchTab({
+    url: `../index/index`,
+  })
+}
+const handleToCart = () => {
+    uni.switchTab({
+    url: `../cart/index`,
+  })
 }
 
 const handleAddCart = () => {

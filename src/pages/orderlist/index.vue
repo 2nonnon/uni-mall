@@ -36,21 +36,12 @@ import { computed, reactive, ref } from 'vue';
 import PriceVue from '../../components/Price/Price.vue';
 import GoodCard from '../../components/GoodCard/index.vue'
 import EmptyPlaceholder from "../../components/EmptyPlaceholder/index.vue"
+import { useOrder } from '../../composables/useOrder';
 
-const orderStatusMap = {
-  '待支付': OrderStatus.TO_PAID,
-  '待发货': OrderStatus.TO_SEND,
-  '待收货': OrderStatus.TO_DEAL,
-  '售后': OrderStatus.TO_SERVICE
-}
-
-const orderStatusReMap = {
-  [OrderStatus.TO_PAID]: '待支付',
-  [OrderStatus.TO_SEND]: '待发货',
-  [OrderStatus.TO_DEAL]: '待收货',
-  [OrderStatus.TO_SERVICE]: '售后',
-  [OrderStatus.HAS_CLOSED]: '交易关闭'
-}
+const {
+  orderStatusMap,
+  orderStatusReMap,
+} = useOrder()
 
 const activeNav = ref('全部')
 const orderlist = reactive<IOrder[]>([])
@@ -108,6 +99,12 @@ loadOrders()
 
 .nav-item_active {
   color: #ff6d6d;
+}
+
+.orderlist-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
 }
 
 .orderlist-card {

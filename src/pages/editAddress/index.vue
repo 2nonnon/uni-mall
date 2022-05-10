@@ -12,9 +12,9 @@
       <view class="address-field">
         <view class="address-key">选择地区</view>
         <view class="address-value">
-          <view class="address-input">
-            <input type="text" placeholder="省份城市区县" class="input" v-model="location.province" />
-          </view>
+          <picker mode="region" @change="handleRegionChange">
+            <view class="address-picker">{{ location.region }}</view>
+          </picker>
         </view>
       </view>
       <view class="address-field">
@@ -58,7 +58,7 @@
 
 <script setup lang="ts">
 import { onLoad } from '@dcloudio/uni-app';
-import { computed, onMounted, reactive, ref, watchEffect } from 'vue'
+import { computed, reactive, ref, watchEffect } from 'vue'
 import { addressService } from '../../serve/api/address';
 import { CreateAddressDto, IAddress } from '../../serve/api/types/address.type';
 
@@ -88,26 +88,24 @@ const isValidate = computed(() => {
 })
 
 interface Location {
-  province: string
-  city: string
-  town: string
+  region: string
   detail: string
 }
 
-const location = reactive<Location>({} as Location)
+const location = reactive<Location>({ region: '省市区县、乡镇等' } as Location)
 
-const emit = defineEmits(['close-edit', 'close-address'])
-
-const handleClose = () => {
-  emit('close-edit')
+const handleRegionChange = (e: { detail: { value: string[] } }) => {
+  console.log(e.detail.value)
+  location.region = e.detail.value.join(' ')
 }
+
 const hanldeToggleDefault = () => {
   address.isDefault = !address.isDefault
 }
 const handleDeleteAddress = (id: string) => {
   addressService.deleteAddress(id).then((res) => {
     console.log('delete', res)
-    handleClose()
+    uni.navigateBack({})
   })
 }
 
@@ -115,13 +113,13 @@ const policies = {
   [EditStatus.CREATE]: (data: CreateAddressDto) => {
     addressService.createAddress(data).then((res) => {
       console.log('create address', res)
-      handleClose()
+      uni.navigateBack({})
     })
   },
   [EditStatus.UPDATE]: (data: CreateAddressDto) => {
     addressService.wxUpdateAddress(address.id, data).then((res) => {
       console.log('update address', res)
-      handleClose()
+      uni.navigateBack({})
     })
   }
 }
@@ -137,10 +135,8 @@ const handleSaveAddress = () => {
 const initLocation = () => {
   const tmp = address.destination.split(' ')
   if (tmp?.length === 4) {
-    location.province = tmp[0]
-    location.city = tmp[1]
-    location.town = tmp[2]
-    location.detail = tmp[3]
+    location.detail = tmp.pop() as string
+    location.region = tmp.join(' ')
   }
 }
 watchEffect(() => {
@@ -148,6 +144,7 @@ watchEffect(() => {
 })
 
 onLoad((options) => {
+  console.log(addressService.getCities())
   status.value = options.status as EditStatus
   if (options.id) {
     addressService.getAddressById(options.id).then((res) => {
@@ -198,8 +195,9 @@ onLoad((options) => {
   flex: 1;
 }
 
-.address-input {
-  position: relative;
+.address-picker {
+  height: 48rpx;
+  line-height: 48rpx;
 }
 
 .input {

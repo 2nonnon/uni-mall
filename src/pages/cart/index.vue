@@ -4,19 +4,19 @@
       <view class="goods-list" v-if="hasCart">
         <view class="good-card" v-for="item in cartlist" :key="item.id">
           <checkbox class="card-checkbox" :checked="item.checked" @click="checkCart(item)" />
-          <view class="good-img">
+          <view class="good-img" @click="handleToGoodDetail(item.goodId)">
             <image :src="item.sku.img_url" mode="aspectFit" />
           </view>
           <view class="good-card_info">
             <view class="good-info_header">
-              <view class="good-name">{{ item.goodName }}</view>
+              <view class="good-name" @click="handleToGoodDetail(item.goodId)">{{ item.goodName }}</view>
               <view class="good-delete" @click="deleteCart(item.id)">
                 <icon type="cancel" size="20" />
               </view>
             </view>
-            <view class="good-attr">{{ item.sku.name }}</view>
+            <view class="good-attr" @click="handleToGoodDetail(item.goodId)">{{ item.sku.name }}</view>
             <view class="good-info_footer">
-              <view class="good-price">
+              <view class="good-price" @click="handleToGoodDetail(item.goodId)">
                 <price-vue :num-font="14" :cur-font="12" :has-fix="true" :price="[item.sku.market_price]"></price-vue>
               </view>
               <view class="good-count">
@@ -73,6 +73,12 @@ const {
   loadCartlist,
   deleteCart,
   deleteCarts } = useCart()
+
+const handleToGoodDetail = (id: string) => {
+  uni.navigateTo({
+    url: `../detail/index?id=${id}`
+  })
+}
 
 const handleSettle = () => {
   const ids: number[] = [];

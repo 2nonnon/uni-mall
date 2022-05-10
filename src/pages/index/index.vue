@@ -13,7 +13,10 @@
                 sortMap[item]
             }}</view>
         </view>
-        <view class="goodlist-header_category" @click="handleToCategory">分类</view>
+        <view class="goodlist-header_category" @click="handleToCategory">
+          <image src="../../static/icon/integral.png" mode="scaleToFill" />
+          <text>分类</text>
+        </view>
       </view>
     </view>
     <scroll-view scroll-y refresher-enabled :refresher-triggered="refresherTriggered"
@@ -209,6 +212,16 @@ onMounted(() => {
   color: #ff6d6d;
 }
 
+.goodlist-header_category {
+  display: flex;
+  align-items: center;
+}
+
+.goodlist-header_category image {
+  width: 50rpx;
+  height: 50rpx;
+}
+
 .goodlist-empty {
   height: calc(100vh - var(--status-bar-height) - 2 * var(--height));
   width: 100%;
@@ -280,7 +293,6 @@ onMounted(() => {
 .card-content_price {
   margin-top: 10px;
   font-weight: bolder;
-  font-style: italic;
 }
 
 .card-placeholder {

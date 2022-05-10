@@ -22,6 +22,7 @@ export interface IOrder {
   id: number;
   receive_info: string;
   paid: number;
+  remark?: string;
   status: OrderStatus;
   create_time: string;
   paid_time: string;
@@ -40,6 +41,12 @@ export interface UpdateOrderReceiveInfoDto {
 export interface UpdateOrderStatusDto {
   status: OrderStatus;
 }
+export interface ConfirmOrderDto  {
+  remark?: string;
+  receive_info: string;
+  status: OrderStatus;
+}
+
 export interface IOrdersPage {
   total: number;
   orders: IOrder[];

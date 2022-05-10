@@ -1,18 +1,18 @@
 <template>
   <view class="order-confirm">
+    <view class="order-status">
+      <view class="order-status_content">{{ orderStatusReMap[order.status] }}</view>
+    </view>
     <view class="order-address">
-      <!-- <view class="order-address_has">
-        <view class="order-address_header">
-          <view class="address-info">{{ address.destination }}</view>
-          <view class="order-address_more">〉</view>
-        </view>
-        <view class="order-address_footer">
-          <view>{{ address.receiver }}</view>
-          <view>{{
-              `${address.mobile?.slice(0, 3)}****${address.mobile?.slice(7)}`
-          }}</view>
-        </view>
-      </view> -->
+      <view class="order-address_header">
+        <view>{{ address[0] }}</view>
+        <view>{{
+            `${address[1]?.slice(0, 3)}****${address[1]?.slice(7)}`
+        }}</view>
+      </view>
+      <view class="order-address_footer">
+        <view class="address-info">{{ address.slice(2).join(' ') }}</view>
+      </view>
     </view>
     <view class="order-body">
       <good-card :goods="order.orderDetails"></good-card>
@@ -23,21 +23,34 @@
             <price-vue :price="[0]" :has-fix="true" :cur-font="13" :num-font="14"></price-vue>
           </view>
         </view>
-        <view class="other-info_row">
-          <view class="row_label">优惠券：</view>
-          <view class="row_value">
-            <text class="value_text">暂无可用优惠券</text>
+        <view class="other-info_end">
+          <view class="row_label">需付款</view>
+          <view class="end_value">
+            <price-vue :price="[order.paid]" :has-fix="true" :cur-font="13" :num-font="14"></price-vue>
           </view>
         </view>
       </view>
     </view>
-    <view class="order-remark">
-      <text class="order-remark_title">备注</text>
-      <view class="order-remark_input">
-        <input placeholder="选填，建议先和客服协商一致" placeholder-class="input-placeholder" selection-start="0" selection-end="0"
-          @input="" />
+    <view class="order-info">
+      <text class="order-info_title">订单信息</text>
+      <view class="order-info_item">
+        <view class="info-item_label">订单编号</view>
+        <view class="info-item_value">{{ order.id }}</view>
+      </view>
+      <view class="order-info_item">
+        <view class="info-item_label">创建时间</view>
+        <view class="info-item_value">{{ order.create_time }}</view>
+      </view>
+      <view class="order-info_item" v-if="order.deal_time">
+        <view class="info-item_label">完成时间</view>
+        <view class="info-item_value">{{ order.deal_time }}</view>
+      </view>
+      <view class="order-info_item">
+        <view class="info-item_label">订单备注</view>
+        <view class="info-item_value">{{ order.remark ?? '无' }}</view>
       </view>
     </view>
+    <view class="order-service">联系客服</view>
   </view>
 </template>
 
@@ -48,16 +61,23 @@ import { onLoad } from '@dcloudio/uni-app';
 import { reactive } from 'vue'
 import { orderService } from '../../serve/api/order';
 import { IOrder } from '../../serve/api/types/order.type';
+import { useOrder } from '../../composables/useOrder';
+
+const {
+  orderStatusReMap,
+} = useOrder()
 
 const order = reactive({} as IOrder)
+
+const address = reactive<string[]>([])
 
 const loadOrder = (id: number) => {
   orderService.getOrderById(id).then((res) => {
     console.log(res)
     Object.assign(order, res)
+    address.push(...order.receive_info.split(' '))
   })
 }
-
 
 onLoad((option) => {
   console.log(option.id)
@@ -74,41 +94,33 @@ onLoad((option) => {
   min-height: 100vh;
 }
 
+.order-status {
+  background-color: #fff;
+  padding: 30rpx;
+}
+
+.order-status_content {
+  font-size: 16px;
+}
+
 .order-address {
   padding: 30rpx;
   background-color: #fff;
+  font-size: 14px;
 }
 
 .order-address_header,
 .order-address_footer {
   display: flex;
-  gap: 10rpx;
+  gap: 20rpx;
 }
 
 .order-address_header {
-  justify-content: space-between;
   margin-bottom: 10rpx;
-  font-size: 16px;
-}
-
-.order-address_more {
-  color: #9696a1;
-  font-size: 14px;
-  font-weight: bold;
 }
 
 .order-address_footer {
   color: #9696a1;
-  font-size: 14px;
-}
-
-.order-address_empty {
-  display: flex;
-  justify-content: space-between;
-}
-
-.address-empty_tip {
-  font-size: 18px;
 }
 
 .order-body {
@@ -137,75 +149,43 @@ onLoad((option) => {
   line-height: 20px;
 }
 
-.value_text {
-  color: #9696a1;
-  font-weight: 400;
-}
-
-.order-remark {
-  display: flex;
-  background-color: #fff;
-  padding: 30rpx;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 14px;
-  gap: 30rpx;
-}
-
-.order-remark_input {
-  flex: 1;
-}
-
-.order-remark_input input {
-  direction: rtl;
-  color: #9696a1;
-}
-
-.confirm-footer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  background-color: #fff;
-}
-
-.confirm-footer_wrapper {
+.other-info_end {
   display: flex;
   justify-content: flex-end;
-  align-items: center;
-  padding: 30rpx;
-  gap: 20rpx;
-}
-
-.confirm-footer_info {
-  display: flex;
   align-items: center;
   gap: 10rpx;
 }
 
-.confirm-footer_price {
+.end_value {
   font-weight: bolder;
 }
 
-.good-settle {
-  width: 220rpx;
-  min-width: 220rpx;
-  height: 80rpx;
-  font-size: 14px;
-  line-height: 20px;
-  border-radius: 40rpx;
-  color: #fff;
-  background-color: #ff6d6d;
-  font-weight: bold;
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
-  overflow: hidden;
+.order-info {
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  padding: 30rpx;
+  gap: 30rpx;
 }
 
-.good-settle_disable {
-  color: #c5c5cb;
-  background-color: #f3f3f4;
+.order-info_title {
+  font-size: 16px;
+}
+
+.order-info_item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: #9696a1;
+}
+
+.order-service {
+  padding: 30rpx 0;
+  width: 100%;
+  font-size: 14px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #fff;
 }
 </style>

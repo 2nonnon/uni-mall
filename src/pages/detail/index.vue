@@ -8,12 +8,16 @@
       </swiper>
     </view>
     <view class="detail-content">
-      <view class="detail-content_name">{{ data.name }}</view>
+      <view class="detail-content_wrapper">
+        <image v-if="data.tag > 0" :src="tagMap[data.tag]" mode="aspectFit" />
+        <text class="detail-content_name">{{ data.name }}</text>
+      </view>
       <view class="detail-content_price">
         <price-vue :price="[data.market_price]"></price-vue>
       </view>
       <view class="detail-content_choose" @click="handleShowChoose">
         <text>请选择商品款式</text>
+        <image src="../../static/icon/arrow-right.png" mode="scaleToFill" />
       </view>
     </view>
     <view class="detail-detail">
@@ -23,15 +27,21 @@
       </view>
     </view>
     <view class="detail-footer">
-      <view class="detail-footer_icon" @click="handleToHomePage">首页</view>
-      <view class="detail-footer_icon">客服</view>
-      <view class="detail-footer_icon" @click="handleToCart">购物车</view>
-      <button class="detail-btn detail-btn_add" @click="handleShowChoose">
+      <view class="detail-footer_icon" @click="handleToHomePage">
+        <image src="../../static/icon/apparel.png" mode="scaleToFill" />
+      </view>
+      <view class="detail-footer_icon">
+        <image src="../../static/icon/service.png" mode="scaleToFill" />
+      </view>
+      <view class="detail-footer_icon" @click="handleToCart">
+        <image src="../../static/icon/cart-Empty.png" mode="scaleToFill" />
+      </view>
+      <view class="detail-btn detail-btn_add" @click="handleShowChoose">
         加入购物车
-      </button>
-      <button class="detail-btn detail-btn_buy" @click="handleShowChoose">
+      </view>
+      <view class="detail-btn detail-btn_buy" @click="handleShowChoose">
         立即购买
-      </button>
+      </view>
     </view>
     <view class="detail-choose_wrapper" v-if="showChoose">
       <view class="detail-choose_shade" @click="handleCloseChoose"></view>
@@ -70,12 +80,12 @@
           </view>
         </view>
         <view class="detail-choose_footer">
-          <button class="detail-btn detail-btn_add detail-detail_btn" @click="handleAddCart">
+          <view class="detail-btn detail-btn_add detail-detail_btn" @click="handleAddCart">
             加入购物车
-          </button>
-          <button class="detail-btn detail-btn_buy detail-detail_btn" @click="">
+          </view>
+          <view class="detail-btn detail-btn_buy detail-detail_btn" @click="handleSettle">
             立即购买
-          </button>
+          </view>
         </view>
       </view>
     </view>
@@ -86,11 +96,16 @@
 import { onLoad } from '@dcloudio/uni-app';
 import { reactive, ref, watch } from 'vue'
 import { goodService } from '../../serve/api/good';
-import { IGoodDetail } from '../../serve/api/types/good.type';
+import { IGoodDetail, ISku } from '../../serve/api/types/good.type';
 import CounterVue from '../../components/Counter/Counter.vue';
 import PriceVue from '../../components/Price/Price.vue';
 import { IAttribute } from '../../serve/api/types/attribute.type';
 import { useCart } from '../../composables/useCart'
+import { orderService } from '../../serve/api/order';
+const tagMap = {
+  1: '../../static/status/b62a22805ff37997c816cb91984d71be_1387051523058128219.png',
+  3: '../../static/status/52a332d5a64c66bd3471f5ed39c35868_7340073586395887667.png'
+}
 
 const { addCart } = useCart()
 
@@ -104,6 +119,7 @@ const stock = ref(data.total_stock ?? 0)
 const price = ref(data.market_price ?? 0)
 const skuChoose = reactive<IAttribute[]>([])
 const choosedId = ref(-1)
+const choosedSku = reactive({} as ISku)
 
 const load = (id: string) => {
   goodService.getGoodDetailById(id).then(res => {
@@ -134,20 +150,44 @@ const handleChooseSku = (attr: IAttribute) => {
 }
 
 const handleToHomePage = () => {
-    uni.switchTab({
+  uni.switchTab({
     url: `../index/index`,
   })
 }
 const handleToCart = () => {
-    uni.switchTab({
+  uni.switchTab({
     url: `../cart/index`,
   })
 }
 
 const handleAddCart = () => {
-  addCart({skuId: choosedId.value, quantity: counter.value, goodId: data.id, goodName: data.name})
+  addCart({ skuId: choosedId.value, quantity: counter.value, goodId: data.id, goodName: data.name })
   showChoose.value = false
 }
+
+const handleSettle = () => {
+
+  const orderDetails = [{
+    goodId: data.id,
+    cover_url: choosedSku.img_url,
+    name: data.name,
+    attr: choosedSku.name,
+    quantity: counter.value,
+    market_price: choosedSku.market_price,
+    paid: counter.value * choosedSku.market_price,
+  }];
+  orderService
+    .createOrder({
+      paid: counter.value * choosedSku.market_price,
+      orderDetails: orderDetails,
+    })
+    .then((res) => {
+      console.log("create order", res);
+      uni.navigateTo({
+        url: `../confirm/index?id=${res.id}`,
+      })
+    });
+};
 
 watch(skuChoose, () => {
   if (skuChoose.length === data.attributes.length) {
@@ -161,10 +201,11 @@ watch(skuChoose, () => {
     })
 
     if (choosed) {
+      Object.assign(choosedSku, choosed)
       stock.value = choosed.stock
       price.value = choosed.market_price
       skuImg.value = choosed.img_url
-      choosedId.value = choosed.id 
+      choosedId.value = choosed.id
     }
   }
 })
@@ -205,8 +246,9 @@ onLoad((option) => {
   gap: 20rpx;
 }
 
-.detail-content_name {
+.detail-content_wrapper {
   line-height: 20px;
+  font-size: 16px;
   overflow: hidden;
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -214,25 +256,42 @@ onLoad((option) => {
   text-overflow: ellipsis;
 }
 
+.detail-content_wrapper image {
+  height: 20px;
+  vertical-align: -25%;
+  width: 100rpx;
+  margin-right: 10rpx;
+}
+
 .detail-content_price {
   font-size: 24px;
   font-weight: bolder;
-  font-style: italic;
 }
 
 .detail-content_choose {
   border-top: 1rpx solid #eee;
-  color: #e5e5e5;
+  color: #7A7E83;
   padding: 20rpx 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+}
+
+.detail-content_choose image {
+  width: 50rpx;
+  height: 50rpx;
 }
 
 .detail-detail {
   background-color: #fff;
   margin-top: 20rpx;
+  font-size: 0;
 }
 
 .detail-detail_title {
   padding: 20rpx 30rpx;
+  font-size: 16px;
 }
 
 .detail-detail_image {
@@ -309,7 +368,7 @@ onLoad((option) => {
 .detail-choose_image {
   width: 200rpx;
   height: 200rpx;
-  border: 1rpx solid #e5e5e5;
+  border: 1rpx solid #eee;
 }
 
 .detail-choose_content {
@@ -318,12 +377,11 @@ onLoad((option) => {
 
 .detail-choose_price {
   font-weight: bolder;
-  font-style: italic;
 }
 
 .detail-choose_stock {
   font-size: 14px;
-  color: #eee;
+  color: #7A7E83;
 }
 
 .detail-choose_close {
@@ -377,6 +435,17 @@ onLoad((option) => {
   align-items: center;
   height: 100rpx;
   gap: 30rpx;
+}
+
+.detail-footer_icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.detail-footer_icon image {
+  height: 60rpx;
+  width: 60rpx;
 }
 
 .detail-detail_btn {

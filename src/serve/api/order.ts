@@ -1,5 +1,5 @@
 import BaseHttpService from '../base-http.service'
-import { CreateOrderDto, GetOrdersPageDto, IOrder, IOrdersPage, UpdateOrderReceiveInfoDto, UpdateOrderStatusDto } from './types/order.type'
+import { ConfirmOrderDto, CreateOrderDto, GetOrdersPageDto, IOrder, IOrdersPage, UpdateOrderReceiveInfoDto, UpdateOrderStatusDto } from './types/order.type'
 
 class OrderService extends BaseHttpService {
     private BASE_URL = 'orders'
@@ -28,8 +28,8 @@ class OrderService extends BaseHttpService {
       return await this.post<IOrder>(`${this.BASE_URL}/${id}/receive`, data)
     }
 
-    async updateOrder (id: number, data: UpdateOrderStatusDto & UpdateOrderReceiveInfoDto) {
-      return await this.post<IOrder>(`${this.BASE_URL}/${id}/update`, data)
+    async confirmOrder (id: number, data: ConfirmOrderDto) {
+      return await this.post<IOrder>(`${this.BASE_URL}/${id}/confirm`, data)
     }
 }
 

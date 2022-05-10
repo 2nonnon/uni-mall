@@ -1,8 +1,13 @@
 import BaseHttpService from '../base-http.service'
 import { CreateAddressDto, IAddress } from './types/address.type'
+import cities from '../../static/list.json'
 
 class AddressService extends BaseHttpService {
     private BASE_URL = 'addresses'
+
+    getCities() {
+        return cities.data
+    }
 
     async getAddresses() {
         return await this.get<IAddress[]>(`${this.BASE_URL}`)

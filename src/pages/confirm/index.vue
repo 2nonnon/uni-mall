@@ -4,7 +4,7 @@
       <view class="order-address_has" v-if="hasAddress">
         <view class="order-address_header">
           <view class="address-info">{{ address.destination }}</view>
-          <view class="order-address_more">〉</view>
+          <image src="../../static/icon/arrow-right.png" mode="scaleToFill" />
         </view>
         <view class="order-address_footer">
           <view>{{ address.receiver }}</view>
@@ -39,19 +39,35 @@
       <text class="order-remark_title">备注</text>
       <view class="order-remark_input">
         <input placeholder="选填，建议先和客服协商一致" placeholder-class="input-placeholder" selection-start="0" selection-end="0"
-          @input="" />
+          v-model="data.remark" />
       </view>
     </view>
     <view class="confirm-footer">
       <view class="confirm-footer_wrapper">
         <view class="confirm-footer_info">
-          <view class="confirm-footer_text">共3件, 需付款</view>
+          <view class="confirm-footer_text">共{{ data.orderDetails.reduce((pre, cur) => cur.quantity + pre, 0) }}件, 需付款
+          </view>
           <view class="confirm-footer_price">
             <price-vue :price="[data.paid]" :has-fix="true" :cur-font="14" :num-font="18"></price-vue>
           </view>
         </view>
-        <view :class="{ 'good-settle_disable': hasAddress }" class="good-settle" @click="handleSettle">
+        <view :class="{ 'good-settle_disable': !hasAddress }" class="good-settle" @click="handleSettle">
           提交订单
+        </view>
+      </view>
+    </view>
+    <view class="order-confirm_dialog" v-if="toPay">
+      <view class="confirm-dialog_wrapper">
+        <view class="order-confirm_price">
+          <price-vue :price="[data.paid]" :has-fix="true" :cur-font="16" :num-font="22"></price-vue>
+        </view>
+        <view class="order-confirm_opt">
+          <view class="good-settle" @click="handleCancel">
+            放弃支付
+          </view>
+          <view class="good-settle" @click="handlePay">
+            确认支付
+          </view>
         </view>
       </view>
     </view>
@@ -62,13 +78,14 @@
 import PriceVue from '../../components/Price/Price.vue'
 import GoodCard from '../../components/GoodCard/index.vue'
 import { onLoad } from '@dcloudio/uni-app';
-import { reactive, computed, watchEffect } from 'vue'
+import { reactive, computed, watchEffect, ref } from 'vue'
 import { addressService } from '../../serve/api/address';
 import { orderService } from '../../serve/api/order';
 import { IAddress } from '../../serve/api/types/address.type';
 import { IOrder, OrderStatus } from '../../serve/api/types/order.type';
 
 const data = reactive({} as IOrder)
+const toPay = ref(false)
 
 enum AddressIsDefault {
   IsDefault = 1,
@@ -85,16 +102,34 @@ const hasAddress = computed(() => Boolean(address.id))
 const getDefaultAddress = () => {
   addressService.getDefaultAddresses().then((res) => {
     Object.assign(address, res)
+    data.receive_info = `${address.receiver} ${address.mobile} ${address.destination}`
   })
 }
 
 const handleSettle = () => {
-  orderService.updateOrder(data.id, {
+  orderService.confirmOrder(data.id, {
     receive_info: data.receive_info,
-    status: OrderStatus.TO_PAID
+    status: OrderStatus.TO_PAID,
+    remark: data.remark
   })
     .then((res) => {
       console.log('settle', res)
+      toPay.value = true
+    })
+}
+
+const handleCancel = () => {
+  uni.redirectTo({
+    url: `../order/index?id=${data.id}`,
+  })
+}
+const handlePay = () => {
+  orderService.updateOrderStatus(data.id, {
+    status: OrderStatus.TO_SEND
+  })
+    .then((res) => {
+      console.log('pay', res)
+      handleCancel()
     })
 }
 
@@ -142,10 +177,9 @@ onLoad((option) => {
   font-size: 16px;
 }
 
-.order-address_more {
-  color: #9696a1;
-  font-size: 14px;
-  font-weight: bold;
+.order-address_header image {
+  height: 50rpx;
+  width: 50rpx;
 }
 
 .order-address_footer {
@@ -258,5 +292,39 @@ onLoad((option) => {
 .good-settle_disable {
   color: #c5c5cb;
   background-color: #f3f3f4;
+}
+
+.order-confirm_dialog {
+  background-color: rgba(0, 0, 0, 0.5);
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.confirm-dialog_wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 50rpx;
+  padding: 50rpx;
+  border-radius: 25rpx;
+  background-color: #fff;
+  z-index: 999;
+}
+
+.order-confirm_price {
+  color: #ff6d6d;
+  font-weight: bolder;
+  display: flex;
+  justify-content: center;
+}
+
+.order-confirm_opt {
+  display: flex;
+  gap: 50rpx;
 }
 </style>

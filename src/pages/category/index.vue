@@ -3,13 +3,13 @@
     <view class="category-parent">
       <view class="category-parent_wrapper" @click="handleChooseCategory(null)">
         <view class="category-parent_name">全部商品</view>
-        <view class="category-arrow">〉</view>
+        <image src="../../static/icon/arrow-right.png" mode="scaleToFill" />
       </view>
     </view>
     <view class="category-parent" v-for="parent in categories" :key="parent.name">
       <view class="category-parent_wrapper" @click="handleChooseCategory(parent)">
         <view class="category-parent_name">{{ parent.name }}</view>
-        <view class="category-arrow">〉</view>
+        <image src="../../static/icon/arrow-right.png" mode="scaleToFill" />
       </view>
       <view class="category-children_container" v-if="parent.children && parent.children!.length > 0">
         <view class="category-child" v-for="child in parent.children" :key="child.name"
@@ -63,6 +63,11 @@ onLoad(() => {
   align-items: center;
   font-size: 16px;
   font-weight: bold;
+}
+
+.category-parent_wrapper image {
+  width: 50rpx;
+  height: 50rpx;
 }
 
 .category-children_container {

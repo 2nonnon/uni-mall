@@ -16,19 +16,19 @@
     <view class="profile-body">
       <view class="profile-menu_list">
         <view class="menu-list_item" @click="handleToOrderList">
-          <image src="" mode="scaleToFill" />
+          <image src="../../static/icon/order.png" mode="scaleToFill" />
           <view class="list-item_content">我的订单</view>
-          <view class="list-item_arrow">〉</view>
+          <image class="list-item_arrow" src="../../static/icon/arrow-right.png" mode="scaleToFill" />
         </view>
         <view class="menu-list_item" @click="handleToAddress">
-          <image src="" mode="scaleToFill" />
+          <image src="../../static/icon/map.png" mode="scaleToFill" />
           <view class="list-item_content">收货地址</view>
-          <view class="list-item_arrow">〉</view>
+          <image class="list-item_arrow" src="../../static/icon/arrow-right.png" mode="scaleToFill" />
         </view>
         <view class="menu-list_item">
-          <image src="" mode="scaleToFill" />
+          <image src="../../static/icon/service.png" mode="scaleToFill" />
           <view class="list-item_content">联系客服</view>
-          <view class="list-item_arrow">〉</view>
+          <image class="list-item_arrow" src="../../static/icon/arrow-right.png" mode="scaleToFill" />
         </view>
       </view>
     </view>
@@ -105,7 +105,9 @@ const handleToAddress = () => {
 .menu-list_item {
   display: flex;
   justify-content: flex-start;
-  padding: 30rpx;
+  align-items: center;
+  padding: 30rpx 10rpx 30rpx 20rpx;
+  font-size: 14px;
 }
 
 .menu-list_item:not(:last-child) {
@@ -113,8 +115,8 @@ const handleToAddress = () => {
 }
 
 .menu-list_item image {
-  width: 30rpx;
-  height: 30rpx;
+  width: 50rpx;
+  height: 50rpx;
 }
 
 .list-item_arrow {

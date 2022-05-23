@@ -6,3 +6,8 @@ export interface ILoginForm {
 export interface ISigninResponse {
     accessToken: string
 }
+
+export interface IUser {
+    profile: string
+    username: string
+}

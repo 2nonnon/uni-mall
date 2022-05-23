@@ -5,13 +5,13 @@
         全部
       </view>
       <view class="orderlist-nav_item" :class="{ 'nav-item_active': item === activeNav }"
-        v-for="item in Object.keys(orderStatusMap)" :key="item" @click="handleFilteOrder(item, orderStatusMap[item])">
+        v-for="item in Object.keys(orderStatusMap)" :key="item" @click="handleFilteOrder(item, orderStatusMap[item as keyof typeof orderStatusMap])">
         {{ item }}
       </view>
     </view>
     <view class="orderlist-body" v-if="hasOrder">
       <view class="orderlist-card" v-for="order in orderlist" :key="order.id" @click="handleToOrderDetail(order.id)">
-        <view class="order-status">{{ orderStatusReMap[order.status] }}</view>
+        <view class="order-status">{{ orderStatusReMap[order.status as keyof typeof orderStatusReMap] }}</view>
         <good-card style="width: 100%;" :goods="order.orderDetails"></good-card>
         <view class="order-info">
           <view class="order-info_count">{{ `共${order.orderDetails.reduce((pre, cur) => pre + cur.quantity, 0)}件` }}

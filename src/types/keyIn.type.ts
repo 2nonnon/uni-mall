@@ -1,0 +1,1 @@
+type KeyIn<T> = T extends Record<infer K, string> ? K : void

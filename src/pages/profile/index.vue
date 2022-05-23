@@ -2,10 +2,10 @@
   <view class="content">
     <view class="profile-header">
       <view class="profile-header_avatar">
-        <image src="../../static/avatar/profile.png" mode="scaleToFill" />
+        <image :src="profile" mode="scaleToFill" />
       </view>
       <view class="profile-header_content" v-if="hasSignIn">
-        <view class="header-content_name">用户1551235288</view>
+        <view class="header-content_name">{{ userInfo?.username }}</view>
       </view>
       <view class="profile-header_content" v-else>
         <view class="profile-header_signin" @click="handleSignIn">
@@ -25,11 +25,11 @@
           <view class="list-item_content">收货地址</view>
           <image class="list-item_arrow" src="../../static/icon/arrow-right.png" mode="scaleToFill" />
         </view>
-        <view class="menu-list_item">
+        <button open-type="contact" class="menu-list_item button-reset">
           <image src="../../static/icon/service.png" mode="scaleToFill" />
           <view class="list-item_content">联系客服</view>
           <image class="list-item_arrow" src="../../static/icon/arrow-right.png" mode="scaleToFill" />
-        </view>
+        </button>
       </view>
     </view>
     <view class="profile-footer" v-if="hasSignIn">
@@ -43,9 +43,18 @@
 </template>
 
 <script setup lang="ts">
+import { computed, onMounted } from 'vue';
 import { useUser } from '../../composables/useUser'
 
-const { hasSignIn, handleSignIn, handleSignOut } = useUser()
+const { hasSignIn, userInfo, getUserInfo, handleSignIn, handleSignOut } = useUser()
+const profile = computed(() => {
+  if (hasSignIn) {
+    if (userInfo.value?.profile) return userInfo.value?.profile
+    else return '../../static/avatar/avatar40017.webp'
+  } else {
+    return '../../static/avatar/profile.png'
+  }
+})
 
 const handleToOrderList = () => {
   uni.navigateTo({
@@ -58,6 +67,12 @@ const handleToAddress = () => {
     url: `../address/index`,
   })
 }
+
+onMounted(() => {
+  if (hasSignIn) {
+    getUserInfo()
+  }
+})
 </script>
 
 <style  scoped>
@@ -108,6 +123,19 @@ const handleToAddress = () => {
   align-items: center;
   padding: 30rpx 10rpx 30rpx 20rpx;
   font-size: 14px;
+}
+
+.button-reset {
+  font-size: 14px;
+  background-color: inherit;
+  line-height: inherit;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.button-reset::after {
+  border: none;
 }
 
 .menu-list_item:not(:last-child) {

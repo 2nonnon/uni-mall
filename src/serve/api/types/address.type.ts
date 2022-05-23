@@ -8,5 +8,4 @@ export interface CreateAddressDto {
 
 export interface IAddress extends Required<CreateAddressDto> {
     id: string;
-    isChoosed: boolean;
 }

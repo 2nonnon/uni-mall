@@ -79,9 +79,8 @@ const address = reactive<IAddress>({
   mobile: '',
   destination: '',
   remark: '',
-  isChoosed: false,
   isDefault: false
-})
+} as IAddress)
 
 const isValidate = computed(() => {
   return address.destination && address.receiver && address.mobile

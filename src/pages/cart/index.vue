@@ -41,7 +41,7 @@
             </view>
           </view>
           <view>
-            <view :class="{ 'good-settle_disable': hasChecked }" class="good-settle" @click="handleSettle">
+            <view :class="{ 'good-settle_disable': notHasChecked }" class="good-settle" @click="handleSettle">
               结算
             </view>
           </view>
@@ -66,7 +66,7 @@ const {
   hasCart,
   cartlist,
   checkAll,
-  hasChecked,
+  notHasChecked,
   totalPrice,
   checkCart,
   checkAllCart,
@@ -81,6 +81,7 @@ const handleToGoodDetail = (id: string) => {
 }
 
 const handleSettle = () => {
+  if (notHasChecked.value) return
   const ids: number[] = [];
   const settleGoods = cartlist.filter((item) => item.checked);
   const paid = settleGoods.reduce((res, cur) => {

@@ -1,8 +1,8 @@
 <template>
   <view class="address-wrapper">
     <view class="address-list">
-      <view class="address-list-item" :class="{ 'is-choosed': item.isChoosed }" v-for="item in data" :key="item.id"
-        @click="handleChoose(item.id)">
+      <view class="address-list-item" :class="{ 'is-choosed': item.id === choosedAddress?.id }" v-for="item in addressList" :key="item.id"
+        @click="ChangeChoosedAddress(item)">
         <view class="address-list-item-content">
           <view class="address-list-item-info">
             <text>{{ item.receiver }}</text>
@@ -36,14 +36,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
-import { addressService } from '../../serve/api/address';
-import { IAddress } from '../../serve/api/types/address.type';
+import { onShow } from '@dcloudio/uni-app';
+import { useAddress } from '../../composables/useAddress'
 
-const data = reactive<IAddress[]>([])
-const notHasAddress = computed(() => {
-  return data.length === 0
-})
+const {
+        choosedAddress,
+        addressList,
+        notHasAddress,
+        loadAddressList,
+        ChangeChoosedAddress
+    } = useAddress()
 
 enum EditStatus {
   CREATE = 'CREATE',
@@ -51,38 +53,24 @@ enum EditStatus {
 }
 
 const handleToEditAddress = (status: EditStatus, id?: string) => {
+  console.log(id)
   uni.navigateTo({
     url: `../editAddress/index?status=${status}&id=${id}`,
   })
 }
 
-type SortFunc = (arr: IAddress[]) => void
+// type SortFunc = (arr: IAddress[]) => void
 
-const sortByChoosed: SortFunc = (arr) => {
-  for (let i = arr.length - 1; i > 0; i--) {
-    if (arr[i].isChoosed) {
-      ;[arr[i], arr[i - 1]] = [arr[i - 1], arr[i]]
-    }
-  }
-}
+// const sortByChoosed: SortFunc = (arr) => {
+//   for (let i = arr.length - 1; i > 0; i--) {
+//     if (arr[i].isChoosed) {
+//       ;[arr[i], arr[i - 1]] = [arr[i - 1], arr[i]]
+//     }
+//   }
+// }
 
-const load = () => {
-  addressService.getAddresses().then((res) => {
-    console.log('get all addresses', res)
-    data.length = 0
-    data.push(...res)
-    sortByChoosed(data)
-  })
-}
-
-const handleChoose = (id: string) => {
-  addressService.wxUpdateAddressChoose(id).then((res) => {
-    load()
-  })
-}
-
-onMounted(() => {
-  load()
+onShow(() => {
+  loadAddressList()
 })
 </script>
 
@@ -108,7 +96,7 @@ onMounted(() => {
   background: #fff;
   border-radius: 10rpx;
   padding: 30rpx;
-  border: 1px solid #e6e6e6;
+  border: 2px solid #e6e6e6;
 }
 
 .address-list-item:not(:last-child) {

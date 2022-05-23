@@ -9,7 +9,7 @@
     </view>
     <view class="detail-content">
       <view class="detail-content_wrapper">
-        <image v-if="data.tag > 0" :src="tagMap[data.tag]" mode="aspectFit" />
+        <image v-if="data.tag > 0" :src="tagMap[data.tag as 1 | 3]" mode="aspectFit" />
         <text class="detail-content_name">{{ data.name }}</text>
       </view>
       <view class="detail-content_price">
@@ -23,25 +23,29 @@
     <view class="detail-detail">
       <view class="detail-detail_title">商品详情</view>
       <view class="detail-detail_body">
-        <image v-for="item in data.detail" :key="item" :src="item" class="detail-detail_image" mode="widthFix" />
+        <image
+          v-for="item in data.detail"
+          :key="item"
+          :src="item"
+          class="detail-detail_image"
+          mode="widthFix"
+        />
       </view>
     </view>
     <view class="detail-footer">
       <view class="detail-footer_icon" @click="handleToHomePage">
         <image src="../../static/icon/apparel.png" mode="scaleToFill" />
       </view>
-      <view class="detail-footer_icon">
+      <button open-type="contact" class="detail-footer_icon button-reset">
         <image src="../../static/icon/service.png" mode="scaleToFill" />
-      </view>
+      </button>
       <view class="detail-footer_icon" @click="handleToCart">
         <image src="../../static/icon/cart-Empty.png" mode="scaleToFill" />
       </view>
       <view class="detail-btn detail-btn_add" @click="handleShowChoose">
         加入购物车
       </view>
-      <view class="detail-btn detail-btn_buy" @click="handleShowChoose">
-        立即购买
-      </view>
+      <view class="detail-btn detail-btn_buy" @click="handleShowChoose"> 立即购买 </view>
     </view>
     <view class="detail-choose_wrapper" v-if="showChoose">
       <view class="detail-choose_shade" @click="handleCloseChoose"></view>
@@ -56,9 +60,7 @@
             </view>
             <view class="detail-choose_stock">{{ `剩余${stock}件` }}</view>
           </view>
-          <view class="detail-choose_close" @click="handleCloseChoose">
-            X
-          </view>
+          <view class="detail-choose_close" @click="handleCloseChoose"> X </view>
         </view>
         <view class="detail-choose_body">
           <view class="detail-sku" v-for="sku in data.attributes" :key="sku.id">
@@ -66,8 +68,13 @@
               {{ sku.name }}
             </view>
             <view class="detail-sku_value-container">
-              <view class="detail-sku_value" :class="{ 'detail-sku_choose': skuChoose.some(_ => _.id === item.id) }"
-                v-for="item in sku.children" :key="item.id" @click="handleChooseSku(item)">
+              <view
+                class="detail-sku_value"
+                :class="{ 'detail-sku_choose': skuChoose.some((_) => _.id === item.id) }"
+                v-for="item in sku.children"
+                :key="item.id"
+                @click="handleChooseSku(item)"
+              >
                 {{ item.name }}
               </view>
             </view>
@@ -80,102 +87,126 @@
           </view>
         </view>
         <view class="detail-choose_footer">
-          <view class="detail-btn detail-btn_add detail-detail_btn" @click="handleAddCart">
+          <view
+            class="detail-btn detail-btn_add detail-detail_btn"
+            @click="handleAddCart"
+          >
             加入购物车
           </view>
-          <view class="detail-btn detail-btn_buy detail-detail_btn" @click="handleSettle">
+          <view class="detail-btn detail-btn_buy detail-detail_btn" @click="settleValidate">
             立即购买
           </view>
         </view>
       </view>
     </view>
   </view>
+  <message-vue ref="message"></message-vue>
 </template>
 
 <script setup lang="ts">
-import { onLoad } from '@dcloudio/uni-app';
-import { reactive, ref, watch } from 'vue'
-import { goodService } from '../../serve/api/good';
-import { IGoodDetail, ISku } from '../../serve/api/types/good.type';
-import CounterVue from '../../components/Counter/Counter.vue';
-import PriceVue from '../../components/Price/Price.vue';
-import { IAttribute } from '../../serve/api/types/attribute.type';
-import { useCart } from '../../composables/useCart'
-import { orderService } from '../../serve/api/order';
+import { onLoad } from "@dcloudio/uni-app";
+import { reactive, ref, watch } from "vue";
+import { goodService } from "../../serve/api/good";
+import { IGoodDetail, ISku } from "../../serve/api/types/good.type";
+import CounterVue from "../../components/Counter/Counter.vue";
+import PriceVue from "../../components/Price/Price.vue";
+import MessageVue from "../../components/Message/index.vue"
+import { IAttribute } from "../../serve/api/types/attribute.type";
+import { useCart } from "../../composables/useCart";
+import { orderService } from "../../serve/api/order";
 const tagMap = {
-  1: '../../static/status/b62a22805ff37997c816cb91984d71be_1387051523058128219.png',
-  3: '../../static/status/52a332d5a64c66bd3471f5ed39c35868_7340073586395887667.png'
-}
+  1: "../../static/status/b62a22805ff37997c816cb91984d71be_1387051523058128219.png",
+  3: "../../static/status/52a332d5a64c66bd3471f5ed39c35868_7340073586395887667.png",
+};
 
-const { addCart } = useCart()
+const { addCart } = useCart();
 
-const currentBannerImg = ref(0)
-const data = reactive({} as IGoodDetail)
-const counter = ref(1)
+const currentBannerImg = ref(0);
+const data = reactive({} as IGoodDetail);
+const counter = ref(1);
 
-const showChoose = ref(false)
-const skuImg = ref('')
-const stock = ref(data.total_stock ?? 0)
-const price = ref(data.market_price ?? 0)
-const skuChoose = reactive<IAttribute[]>([])
-const choosedId = ref(-1)
-const choosedSku = reactive({} as ISku)
+const showChoose = ref(false);
+const skuImg = ref("");
+const stock = ref(data.total_stock ?? 0);
+const price = ref(data.market_price ?? 0);
+const skuChoose = reactive<IAttribute[]>([]);
+const choosedId = ref(-1);
+const choosedSku = reactive({} as ISku);
 
 const load = (id: string) => {
-  goodService.getGoodDetailById(id).then(res => {
-    Object.assign(data, res)
-    skuImg.value = data.cover_url
-    console.log(res)
-  })
+  goodService.getGoodDetailById(id).then((res) => {
+    Object.assign(data, res);
+    skuImg.value = data.cover_url;
+    stock.value = data.total_stock
+    price.value = data.market_price
+    console.log(res);
+  });
+};
+
+const message = ref<{
+    handleShowMessage: (message: string, interval?: number) => void;
+} | null>(null)
+
+const settleValidate = () => {
+  if (choosedId.value < 0)  {
+    message.value?.handleShowMessage('请先选择商品款式')
+  }
+  else handleSettle()
 }
 
 const handleShowChoose = () => {
-  showChoose.value = true
-}
+  showChoose.value = true;
+};
 const handleCloseChoose = () => {
-  showChoose.value = false
-}
+  showChoose.value = false;
+};
 const handleChooseSku = (attr: IAttribute) => {
-  console.log(attr)
-  const index = skuChoose.findIndex(item => item.parentId === attr.parentId)
-  console.log(index)
+  console.log(attr);
+  const index = skuChoose.findIndex((item) => item.parentId === attr.parentId);
+  console.log(index);
   if (index >= 0) {
-    const [pre] = skuChoose.splice(index, 1)
+    const [pre] = skuChoose.splice(index, 1);
     if (pre.id === attr.id) {
-      return
+      return;
     }
   }
-  console.log(skuChoose)
-  skuChoose.push(attr)
-}
+  console.log(skuChoose);
+  skuChoose.push(attr);
+};
 
 const handleToHomePage = () => {
   uni.switchTab({
     url: `../index/index`,
-  })
-}
+  });
+};
 const handleToCart = () => {
   uni.switchTab({
     url: `../cart/index`,
-  })
-}
+  });
+};
 
 const handleAddCart = () => {
-  addCart({ skuId: choosedId.value, quantity: counter.value, goodId: data.id, goodName: data.name })
-  showChoose.value = false
-}
+  addCart({
+    skuId: choosedId.value,
+    quantity: counter.value,
+    goodId: data.id,
+    goodName: data.name,
+  });
+  showChoose.value = false;
+};
 
 const handleSettle = () => {
-
-  const orderDetails = [{
-    goodId: data.id,
-    cover_url: choosedSku.img_url,
-    name: data.name,
-    attr: choosedSku.name,
-    quantity: counter.value,
-    market_price: choosedSku.market_price,
-    paid: counter.value * choosedSku.market_price,
-  }];
+  const orderDetails = [
+    {
+      goodId: data.id,
+      cover_url: choosedSku.img_url,
+      name: data.name,
+      attr: choosedSku.name,
+      quantity: counter.value,
+      market_price: choosedSku.market_price,
+      paid: counter.value * choosedSku.market_price,
+    },
+  ];
   orderService
     .createOrder({
       paid: counter.value * choosedSku.market_price,
@@ -185,38 +216,50 @@ const handleSettle = () => {
       console.log("create order", res);
       uni.navigateTo({
         url: `../confirm/index?id=${res.id}`,
-      })
+      });
     });
 };
 
 watch(skuChoose, () => {
   if (skuChoose.length === data.attributes.length) {
-    const choosed = data.skus.find(item => {
-      return item.attributes.every(attr => {
-        if (attr.parentId === 0) return true
+    const choosed = data.skus.find((item) => {
+      return item.attributes.every((attr) => {
+        if (attr.parentId === 0) return true;
         else {
-          return skuChoose.some(sku => sku.id === attr.id)
+          return skuChoose.some((sku) => sku.id === attr.id);
         }
-      })
-    })
+      });
+    });
 
     if (choosed) {
-      Object.assign(choosedSku, choosed)
-      stock.value = choosed.stock
-      price.value = choosed.market_price
-      skuImg.value = choosed.img_url
-      choosedId.value = choosed.id
+      Object.assign(choosedSku, choosed);
+      stock.value = choosed.stock;
+      price.value = choosed.market_price;
+      skuImg.value = choosed.img_url;
+      choosedId.value = choosed.id;
     }
   }
-})
+});
 
 onLoad((option) => {
-  console.log(option.id)
-  load(option.id!)
-})
+  console.log(option.id);
+  load(option.id!);
+});
 </script>
 
 <style scoped>
+.button-reset {
+  font-size: 14px;
+  background-color: inherit;
+  line-height: inherit;
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+.button-reset::after {
+  border: none;
+}
 .content {
   display: flex;
   flex-direction: column;
@@ -270,7 +313,7 @@ onLoad((option) => {
 
 .detail-content_choose {
   border-top: 1rpx solid #eee;
-  color: #7A7E83;
+  color: #7a7e83;
   padding: 20rpx 0;
   display: flex;
   justify-content: space-between;
@@ -381,7 +424,7 @@ onLoad((option) => {
 
 .detail-choose_stock {
   font-size: 14px;
-  color: #7A7E83;
+  color: #7a7e83;
 }
 
 .detail-choose_close {

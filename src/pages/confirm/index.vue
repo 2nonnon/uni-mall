@@ -1,19 +1,19 @@
 <template>
   <view class="order-confirm">
     <view class="order-address">
-      <view class="order-address_has" v-if="hasAddress">
+      <view class="order-address_has" v-if="!notHasAddress" @click="handleOpenChooseAddress">
         <view class="order-address_header">
-          <view class="address-info">{{ address.destination }}</view>
+          <view class="address-info">{{ choosedAddress?.destination }}</view>
           <image src="../../static/icon/arrow-right.png" mode="scaleToFill" />
         </view>
         <view class="order-address_footer">
-          <view>{{ address.receiver }}</view>
+          <view>{{ choosedAddress?.receiver }}</view>
           <view>{{
-              `${address.mobile?.slice(0, 3)}****${address.mobile?.slice(7)}`
+              `${choosedAddress?.mobile?.slice(0, 3)}****${choosedAddress?.mobile?.slice(7)}`
           }}</view>
         </view>
       </view>
-      <view class="order-address_empty" v-else>
+      <view class="order-address_empty" v-else @click="handleOpenChooseAddress">
         <view class="address-empty_tip">无收货地址，请点击前往设置</view>
         <view class="order-address_more">〉</view>
       </view>
@@ -51,7 +51,7 @@
             <price-vue :price="[data.paid]" :has-fix="true" :cur-font="14" :num-font="18"></price-vue>
           </view>
         </view>
-        <view :class="{ 'good-settle_disable': !hasAddress }" class="good-settle" @click="handleSettle">
+        <view :class="{ 'good-settle_disable': notHasAddress }" class="good-settle" @click="handleSettle">
           提交订单
         </view>
       </view>
@@ -78,33 +78,36 @@
 import PriceVue from '../../components/Price/Price.vue'
 import GoodCard from '../../components/GoodCard/index.vue'
 import { onLoad } from '@dcloudio/uni-app';
-import { reactive, computed, watchEffect, ref } from 'vue'
-import { addressService } from '../../serve/api/address';
+import { reactive, watchEffect, ref } from 'vue'
 import { orderService } from '../../serve/api/order';
-import { IAddress } from '../../serve/api/types/address.type';
 import { IOrder, OrderStatus } from '../../serve/api/types/order.type';
+import { useAddress } from '../../composables/useAddress';
 
 const data = reactive({} as IOrder)
 const toPay = ref(false)
 
-enum AddressIsDefault {
-  IsDefault = 1,
-  IsNotDefaylt = 0
-}
+const { choosedAddress, notHasAddress, loadAddressList } = useAddress()
+
+// enum AddressIsDefault {
+//   IsDefault = 1,
+//   IsNotDefaylt = 0
+// }
 
 const handleOpenChooseAddress = () => {
-  console.log('choose address')
-}
-
-const address = reactive({} as IAddress)
-const hasAddress = computed(() => Boolean(address.id))
-
-const getDefaultAddress = () => {
-  addressService.getDefaultAddresses().then((res) => {
-    Object.assign(address, res)
-    data.receive_info = `${address.receiver} ${address.mobile} ${address.destination}`
+  uni.navigateTo({
+    url: `../address/index`,
   })
 }
+
+// const address = reactive({} as IAddress)
+// const hasAddress = computed(() => Boolean(address.id))
+
+// const getDefaultAddress = () => {
+//   addressService.getDefaultAddresses().then((res) => {
+//     Object.assign(address, res)
+//     data.receive_info = `${address.receiver} ${address.mobile} ${address.destination}`
+//   })
+// }
 
 const handleSettle = () => {
   orderService.confirmOrder(data.id, {
@@ -141,13 +144,14 @@ const load = (id: number) => {
 }
 
 watchEffect(() => {
-  data.receive_info = `${address.receiver} ${address.mobile} ${address.destination}`
+  data.receive_info = `${choosedAddress.value?.receiver} ${choosedAddress.value?.mobile} ${choosedAddress.value?.destination}`
 })
 
 onLoad((option) => {
   console.log(option.id)
   load(parseInt(option.id!, 10))
-  getDefaultAddress()
+  if (notHasAddress) loadAddressList()
+  // getDefaultAddress()
 })
 </script>
 

@@ -11,7 +11,7 @@ interface CheckableCart extends ICart {
 const cartlist = reactive<CheckableCart[]>([]);
 
 const checkAll = ref(false)
-const hasChecked = computed<boolean>(() => {
+const notHasChecked = computed<boolean>(() => {
     return !cartlist.some(item => item.checked)
 });
 const hasCart = computed<boolean>(() => {
@@ -76,7 +76,7 @@ export const useCart = () => {
         hasCart,
         cartlist,
         checkAll,
-        hasChecked,
+        notHasChecked,
         totalPrice,
         loadCartlist,
         checkCart,

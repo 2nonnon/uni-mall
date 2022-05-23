@@ -1,7 +1,7 @@
 <template>
   <view class="order-confirm">
     <view class="order-status">
-      <view class="order-status_content">{{ orderStatusReMap[order.status] }}</view>
+      <view class="order-status_content">{{ orderStatusReMap[order.status as keyof typeof orderStatusReMap] }}</view>
     </view>
     <view class="order-address">
       <view class="order-address_header">
@@ -39,24 +39,30 @@
       </view>
       <view class="order-info_item">
         <view class="info-item_label">创建时间</view>
-        <view class="info-item_value">{{ order.create_time }}</view>
+        <view class="info-item_value">{{ getParseDate(parseInt(order.create_time)) }}</view>
       </view>
       <view class="order-info_item" v-if="order.deal_time">
         <view class="info-item_label">完成时间</view>
-        <view class="info-item_value">{{ order.deal_time }}</view>
+        <view class="info-item_value">{{ getParseDate(parseInt(order.deal_time)) }}</view>
       </view>
       <view class="order-info_item">
         <view class="info-item_label">订单备注</view>
         <view class="info-item_value">{{ order.remark ?? '无' }}</view>
       </view>
     </view>
-    <view class="order-service">联系客服</view>
+    <button
+      open-type="contact"
+      class="order-service button-reset"
+    >
+      联系客服
+    </button>
   </view>
 </template>
 
 <script setup lang="ts">
 import PriceVue from '../../components/Price/Price.vue'
 import GoodCard from '../../components/GoodCard/index.vue'
+import { getParseDate } from '../../utils/getParseDate';
 import { onLoad } from '@dcloudio/uni-app';
 import { reactive } from 'vue'
 import { orderService } from '../../serve/api/order';
@@ -177,6 +183,19 @@ onLoad((option) => {
   justify-content: space-between;
   font-size: 14px;
   color: #9696a1;
+}
+
+.button-reset {
+  font-size: 14px;
+  background-color: inherit;
+  line-height: inherit;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.button-reset::after {
+  border: none;
 }
 
 .order-service {

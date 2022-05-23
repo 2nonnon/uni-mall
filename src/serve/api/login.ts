@@ -1,5 +1,5 @@
 import BaseHttpService from '../base-http.service'
-import { ISigninResponse } from './types/login.type'
+import { ISigninResponse, IUser } from './types/login.type'
 
 class LoginService extends BaseHttpService {
   async signin (): Promise<ISigninResponse | void> {
@@ -14,6 +14,10 @@ class LoginService extends BaseHttpService {
         }
       })
     })
+  }
+
+  async getUserInfo () {
+    return await this.get<IUser>('users')
   }
 
   signout () {

@@ -10,4 +10,5 @@ export interface ISigninResponse {
 export interface IUser {
     profile: string
     username: string
+    collection: string[]
 }

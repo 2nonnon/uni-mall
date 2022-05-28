@@ -20,6 +20,11 @@
           <view class="list-item_content">我的订单</view>
           <image class="list-item_arrow" src="../../static/icon/arrow-right.png" mode="scaleToFill" />
         </view>
+        <view class="menu-list_item" @click="handleToCollection">
+          <image src="../../static/icon/collection.png" mode="scaleToFill" />
+          <view class="list-item_content">我的收藏</view>
+          <image class="list-item_arrow" src="../../static/icon/arrow-right.png" mode="scaleToFill" />
+        </view>
         <view class="menu-list_item" @click="handleToAddress">
           <image src="../../static/icon/map.png" mode="scaleToFill" />
           <view class="list-item_content">收货地址</view>
@@ -32,6 +37,15 @@
         </button>
       </view>
     </view>
+    <!-- <button open-type="chooseAvatar" hover-class="button-hover" @chooseavatar="onChooseAvatar">
+      Avatar
+    </button>
+    <input
+      v-model="userInfo!.username"
+      placeholder="请输入昵称"
+      type="nickname"
+    />
+    <input v-model="userInfo!.username" type="nickname" class="weui-input" placeholder="请输入昵称"/> -->
     <view class="profile-footer" v-if="hasSignIn">
       <view class="profile-footer_wrapper">
         <view class="profile-footer_signout" @click="handleSignOut">
@@ -62,11 +76,22 @@ const handleToOrderList = () => {
   })
 }
 
+const handleToCollection = () => {
+    uni.navigateTo({
+    url: `../collection/index`,
+  })
+}
+
 const handleToAddress = () => {
   uni.navigateTo({
     url: `../address/index`,
   })
 }
+
+// const onChooseAvatar = (e: any) => {
+//   console.log(e.detail.avatarUrl)
+//   userInfo.value!.profile = e.detail.avatarUrl
+// }
 
 onMounted(() => {
   if (hasSignIn) {
@@ -92,6 +117,8 @@ onMounted(() => {
 .profile-header_avatar {
   height: 120rpx;
   width: 120rpx;
+  border-radius: 50%;
+  overflow: hidden;
 }
 
 .profile-header_content {

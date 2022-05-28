@@ -41,6 +41,12 @@
 		},
 		{
 			"path": "pages/editAddress/index"
+		},
+		{
+			"path": "pages/collection/index",
+			"style": {
+				"navigationBarTitleText": "collection"
+			}
 		}
 	],
 	"globalStyle": {
@@ -56,8 +62,8 @@
 		"list": [
 			{
 				"pagePath": "pages/index/index",
-				"iconPath": "static/icon/apparel.png",
-				"selectedIconPath": "static/icon/apparel (1).png",
+				"iconPath": "static/icon/product.png",
+				"selectedIconPath": "static/icon/product (1).png",
 				"text": "商品"
 			},
 			{

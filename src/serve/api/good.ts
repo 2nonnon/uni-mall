@@ -1,4 +1,4 @@
-import { CreateGoodDto, GetGoodsPageDto, IGoodDetail, IGoodsPage, UpdateGoodSkuDto, UpdateGoodSpuDto } from './types/good.type'
+import { GetGoodsPageDto, IGood, IGoodDetail, IGoodsPage } from './types/good.type'
 import BaseHttpService from '../base-http.service'
 
 class GoodService extends BaseHttpService {
@@ -6,6 +6,10 @@ class GoodService extends BaseHttpService {
 
   async getGoods (form: GetGoodsPageDto) {
     return await this.post<IGoodsPage>(`${this.BASE_URL}/page`, form)
+  }
+
+  async getGoodByIds (ids: string[]) {
+    return await this.post<IGood[]>(`${this.BASE_URL}/ids`, ids)
   }
 
   async getGoodDetailById (id: string) {

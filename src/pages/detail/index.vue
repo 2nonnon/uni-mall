@@ -23,18 +23,13 @@
     <view class="detail-detail">
       <view class="detail-detail_title">商品详情</view>
       <view class="detail-detail_body">
-        <image
-          v-for="item in data.detail"
-          :key="item"
-          :src="item"
-          class="detail-detail_image"
-          mode="widthFix"
-        />
+        <image v-for="item in data.detail" :key="item" :src="item" class="detail-detail_image" mode="widthFix" />
       </view>
     </view>
     <view class="detail-footer">
-      <view class="detail-footer_icon" @click="handleToHomePage">
-        <image src="../../static/icon/apparel.png" mode="scaleToFill" />
+      <view class="detail-footer_icon " @click="handleToggleCollect">
+        <image :src="hasCollected ? '../../static/icon/collection-fill.png' : '../../static/icon/collection.png'"
+          mode="scaleToFill" />
       </view>
       <button open-type="contact" class="detail-footer_icon button-reset">
         <image src="../../static/icon/service.png" mode="scaleToFill" />
@@ -68,13 +63,8 @@
               {{ sku.name }}
             </view>
             <view class="detail-sku_value-container">
-              <view
-                class="detail-sku_value"
-                :class="{ 'detail-sku_choose': skuChoose.some((_) => _.id === item.id) }"
-                v-for="item in sku.children"
-                :key="item.id"
-                @click="handleChooseSku(item)"
-              >
+              <view class="detail-sku_value" :class="{ 'detail-sku_choose': skuChoose.some((_) => _.id === item.id) }"
+                v-for="item in sku.children" :key="item.id" @click="handleChooseSku(item)">
                 {{ item.name }}
               </view>
             </view>
@@ -87,10 +77,7 @@
           </view>
         </view>
         <view class="detail-choose_footer">
-          <view
-            class="detail-btn detail-btn_add detail-detail_btn"
-            @click="handleAddCart"
-          >
+          <view class="detail-btn detail-btn_add detail-detail_btn" @click="handleAddCart">
             加入购物车
           </view>
           <view class="detail-btn detail-btn_buy detail-detail_btn" @click="settleValidate">
@@ -105,7 +92,7 @@
 
 <script setup lang="ts">
 import { onLoad } from "@dcloudio/uni-app";
-import { reactive, ref, watch } from "vue";
+import { computed, reactive, ref, watch } from "vue";
 import { goodService } from "../../serve/api/good";
 import { IGoodDetail, ISku } from "../../serve/api/types/good.type";
 import CounterVue from "../../components/Counter/Counter.vue";
@@ -114,10 +101,14 @@ import MessageVue from "../../components/Message/index.vue"
 import { IAttribute } from "../../serve/api/types/attribute.type";
 import { useCart } from "../../composables/useCart";
 import { orderService } from "../../serve/api/order";
+import { useUser } from "../../composables/useUser";
 const tagMap = {
   1: "../../static/status/b62a22805ff37997c816cb91984d71be_1387051523058128219.png",
   3: "../../static/status/52a332d5a64c66bd3471f5ed39c35868_7340073586395887667.png",
 };
+
+const { userInfo, getUserInfo, handleAddCollection,
+  handleDeleteCollection } = useUser()
 
 const { addCart } = useCart();
 
@@ -133,6 +124,10 @@ const skuChoose = reactive<IAttribute[]>([]);
 const choosedId = ref(-1);
 const choosedSku = reactive({} as ISku);
 
+const hasCollected = computed(() => {
+  return Boolean(userInfo.value?.collection.includes(`${data.id}`))
+})
+
 const load = (id: string) => {
   goodService.getGoodDetailById(id).then((res) => {
     Object.assign(data, res);
@@ -144,11 +139,11 @@ const load = (id: string) => {
 };
 
 const message = ref<{
-    handleShowMessage: (message: string, interval?: number) => void;
+  handleShowMessage: (message: string, interval?: number) => void;
 } | null>(null)
 
 const settleValidate = () => {
-  if (choosedId.value < 0)  {
+  if (choosedId.value < 0) {
     message.value?.handleShowMessage('请先选择商品款式')
   }
   else handleSettle()
@@ -174,10 +169,15 @@ const handleChooseSku = (attr: IAttribute) => {
   skuChoose.push(attr);
 };
 
-const handleToHomePage = () => {
-  uni.switchTab({
-    url: `../index/index`,
-  });
+const handleToggleCollect = () => {
+  console.log(userInfo.value, hasCollected.value)
+  if (hasCollected.value) {
+    console.log(1)
+    handleDeleteCollection(data.id)
+  } else {
+    console.log(2)
+    handleAddCollection(data.id)
+  }
 };
 const handleToCart = () => {
   uni.switchTab({
@@ -244,6 +244,7 @@ watch(skuChoose, () => {
 onLoad((option) => {
   console.log(option.id);
   load(option.id!);
+  if (!userInfo) getUserInfo()
 });
 </script>
 
@@ -260,6 +261,7 @@ onLoad((option) => {
 .button-reset::after {
   border: none;
 }
+
 .content {
   display: flex;
   flex-direction: column;

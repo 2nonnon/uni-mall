@@ -29,7 +29,7 @@
           </view>
           <view class="card-content">
             <view class="card-content_wrapper">
-              <image v-if="item.tag > 0" :src="tagMap[item.tag]" mode="aspectFit" />
+              <image v-if="item.tag > 0" :src="tagMap[item.tag as keyof typeof tagMap]" mode="aspectFit" />
               <text class="card-content_name">{{ item.name }}</text>
             </view>
             <view class="card-content_price">

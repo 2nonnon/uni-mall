@@ -23,11 +23,25 @@ export const useUser = () => {
         hasSignIn.value = false
     }
 
+    const handleAddCollection = (id: number) => {
+        loginService.addCollection(id).then(() => {
+            getUserInfo()
+        })
+    }
+
+    const handleDeleteCollection = (id: number) => {
+        loginService.deleteCollection(id).then(() => {
+            getUserInfo()
+        })
+    }
+
     return {
         hasSignIn,
         userInfo,
         getUserInfo,
         handleSignIn,
-        handleSignOut
+        handleSignOut,
+        handleAddCollection,
+        handleDeleteCollection
     }
 }
